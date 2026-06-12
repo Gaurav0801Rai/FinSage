@@ -3,7 +3,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Sparkles, AlertCircle, Trash2, ArrowRight } from "lucide-react";
-import { askChatbot } from "@/app/actions/chatbot";
+import { askChatbot, getChatHistory, saveChatMessage, clearChatHistory } from "@/app/actions/chatbot";
+
 
 interface Message {
   role: "user" | "model";
@@ -18,22 +19,45 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function ChatInterface({ isFloating = false }: { isFloating?: boolean }) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "model",
-      text: "Hello! I am your **FinSage AI Assistant**. I am connected directly to your active holdings, latest alerts, and news. How can I help you analyze your portfolio today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Load chat history on mount
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const res = await getChatHistory();
+        if (res.success && res.history) {
+          if (res.history.length > 0) {
+            setMessages(res.history.map((m) => ({ role: m.role, text: m.text })));
+          } else {
+            // Default welcome message
+            setMessages([
+              {
+                role: "model",
+                text: "Hello! I am your **FinSage AI Assistant**. I am connected directly to your active holdings, latest alerts, and news. How can I help you analyze your portfolio today?",
+              },
+            ]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load chat history:", err);
+      } finally {
+        setIsHistoryLoading(false);
+      }
+    }
+    loadHistory();
+  }, []);
+
   // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isHistoryLoading]);
 
   const handleSend = async (textToSend: string) => {
     if (!textToSend.trim() || isLoading) return;
@@ -42,20 +66,28 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     setIsLoading(true);
     setInput("");
 
-    // Add user message to state
+    // Add user message locally
     const newMessages: Message[] = [...messages, { role: "user", text: textToSend }];
     setMessages(newMessages);
 
     try {
-      // Map message state to Gemini API history format
+      // 1. Save user message to Firestore
+      await saveChatMessage("user", textToSend);
+
+      // 2. Map message state to Gemini/Groq API history format
       const historyPayload = messages.map((m) => ({
         role: m.role,
         parts: [{ text: m.text }],
       }));
 
+      // 3. Trigger AI completion Server Action
       const res = await askChatbot(historyPayload, textToSend);
 
       if (res.success && res.response) {
+        // 4. Save model message to Firestore
+        await saveChatMessage("model", res.response);
+        
+        // 5. Update local state
         setMessages((prev) => [...prev, { role: "model", text: res.response! }]);
       } else {
         setError(res.error || "Failed to retrieve response from FinSage AI.");
@@ -68,14 +100,23 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     }
   };
 
-  const handleClearChat = () => {
-    setMessages([
-      {
-        role: "model",
-        text: "Chat cleared. I am ready to answer any questions about your holdings or recent financial news. Ask away!",
-      },
-    ]);
-    setError(null);
+  const handleClearChat = async () => {
+    setIsLoading(true);
+    try {
+      await clearChatHistory();
+      setMessages([
+        {
+          role: "model",
+          text: "Chat cleared. I am ready to answer any questions about your holdings or recent financial news. Ask away!",
+        },
+      ]);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to clear chat history:", err);
+      setError("Failed to clear chat history on server.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Basic markdown-like formatter for bullet points, bold text and code snippets
@@ -126,8 +167,31 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
 
   const heightClass = isFloating ? "h-[380px]" : "h-[calc(100vh-140px)]";
 
+  if (isHistoryLoading) {
+
+    return (
+      <div className={`flex flex-col ${heightClass} w-full relative justify-center items-center`}>
+        <div className="space-y-4 w-full px-4">
+          <div className="flex gap-3 max-w-[70%] mr-auto">
+            <div className="h-9 w-9 rounded-xl bg-white/5 skeleton shrink-0" />
+            <div className="glass-card p-4 rounded-2xl rounded-tl-none border-white/[0.06] bg-white/[0.02] w-full h-20 skeleton" />
+          </div>
+          <div className="flex gap-3 max-w-[70%] ml-auto flex-row-reverse">
+            <div className="h-9 w-9 rounded-xl bg-white/5 skeleton shrink-0" />
+            <div className="glass-card p-4 rounded-2xl rounded-tr-none border-amber-500/20 bg-amber-500/[0.02] w-full h-12 skeleton" />
+          </div>
+          <div className="flex gap-3 max-w-[75%] mr-auto">
+            <div className="h-9 w-9 rounded-xl bg-white/5 skeleton shrink-0" />
+            <div className="glass-card p-4 rounded-2xl rounded-tl-none border-white/[0.06] bg-white/[0.02] w-full h-24 skeleton" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`flex flex-col ${heightClass} w-full relative`}>
+
       {/* Header details */}
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.06]">
         <div />

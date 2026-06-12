@@ -4,6 +4,8 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getAuthenticatedUser } from "@/lib/firebase/session";
 import { fetchPrices } from "@/lib/price-service";
 import { getUSDToINR } from "@/lib/exchange-rate";
+import { FieldValue } from "firebase-admin/firestore";
+
 
 
 interface ChatMessage {
@@ -244,3 +246,109 @@ Maintain this context in your replies. Use the conversation history to provide c
     return { success: false, error: "An unexpected error occurred: " + String(err) };
   }
 }
+
+export interface StoredMessage {
+  id: string;
+  role: "user" | "model";
+  text: string;
+  createdAt: number;
+}
+
+export async function getChatHistory(): Promise<{ success: boolean; history?: StoredMessage[]; error?: string }> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    const snap = await adminDb
+      .collection("users")
+      .doc(user.uid)
+      .collection("chats")
+      .orderBy("createdAt", "asc")
+      .limit(25)
+      .get();
+
+    const history: StoredMessage[] = snap.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        role: data.role as "user" | "model",
+        text: data.text || "",
+        createdAt: data.createdAt ? data.createdAt.toMillis() : Date.now(),
+      };
+    });
+
+    return { success: true, history };
+  } catch (err) {
+    console.error("getChatHistory error:", err);
+    return { success: false, error: "Failed to load chat history." };
+  }
+}
+
+export async function saveChatMessage(
+  role: "user" | "model",
+  text: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    const chatsCol = adminDb
+      .collection("users")
+      .doc(user.uid)
+      .collection("chats");
+
+    // 1. Save new message
+    await chatsCol.add({
+      role,
+      text,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // 2. Query all active messages ordered by createdAt ascending to check limit (25)
+    const snap = await chatsCol.orderBy("createdAt", "asc").get();
+    
+    if (snap.size > 25) {
+      const excessCount = snap.size - 25;
+      const toDeleteDocs = snap.docs.slice(0, excessCount);
+      
+      const batch = adminDb.batch();
+      toDeleteDocs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log(`[Chatbot] Rolling limit enforced. Hard deleted ${excessCount} oldest chat messages.`);
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("saveChatMessage error:", err);
+    return { success: false, error: "Failed to save message." };
+  }
+}
+
+export async function clearChatHistory(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) return { success: false, error: "Not logged in." };
+
+    const snap = await adminDb
+      .collection("users")
+      .doc(user.uid)
+      .collection("chats")
+      .get();
+
+    if (snap.empty) return { success: true };
+
+    const batch = adminDb.batch();
+    snap.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+    
+    return { success: true };
+  } catch (err) {
+    console.error("clearChatHistory error:", err);
+    return { success: false, error: "Failed to clear chat history." };
+  }
+}
+
