@@ -28,4 +28,5 @@ export const ROUTES = {
   alerts: "/alerts",
   watchlist: "/watchlist",
   settings: "/settings",
-} as const;
+  chatbot: "/chatbot",
+} as const;

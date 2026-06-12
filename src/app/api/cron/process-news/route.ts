@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
+import { callMcpTool } from "@/lib/mcp-client";
+
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_MODEL = "gemini-2.5-flash";
@@ -160,6 +162,8 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
   return null;
 }
 
+const SEVERITY_LEVELS: Record<string, number> = { low: 1, medium: 2, high: 3 };
+
 async function createUserAlerts(
   newsId: string,
   affectedSymbols: string[],
@@ -195,6 +199,24 @@ async function createUserAlerts(
 
     if (userHoldings.size === 0) return 0;
 
+    // Fetch user preferences in parallel
+    const uids = Array.from(userHoldings.keys());
+    const userDocs = await Promise.all(
+      uids.map((uid) => adminDb.collection("users").doc(uid).get())
+    );
+
+    const userSettings = new Map<string, { email: string; emailAlerts: boolean; severityThreshold: string }>();
+    for (const doc of userDocs) {
+      if (!doc.exists) continue;
+      const data = doc.data()!;
+      const email = data.email || "";
+      const prefs = data.preferences || {};
+      const emailAlerts = prefs.emailAlerts !== false; // defaults to true
+      const severityThreshold = prefs.alertSeverityThreshold || "medium"; // defaults to medium
+      
+      userSettings.set(doc.id, { email, emailAlerts, severityThreshold });
+    }
+
     const batch = adminDb.batch();
 
     for (const [uid, holdings] of userHoldings.entries()) {
@@ -218,6 +240,47 @@ async function createUserAlerts(
       });
 
       alertsCreated++;
+
+      // Trigger Email alert via MCP client if user enabled it and meets severity threshold
+      const settings = userSettings.get(uid);
+      if (settings && settings.email && settings.emailAlerts) {
+        const alertLevel = SEVERITY_LEVELS[analysis.severity] || 1;
+        const userThreshold = SEVERITY_LEVELS[settings.severityThreshold] || 2;
+
+        if (alertLevel >= userThreshold) {
+          const emailBody = `Hello,
+
+FinSage has detected a market event that might affect your holdings (${holdings.map((h) => h.symbol).join(", ")}):
+
+Alert Severity: ${analysis.severity.toUpperCase()}
+Impact Analysis:
+${analysis.baseImpact}
+
+You can view more details directly in your FinSage dashboard.
+
+Regards,
+FinSage AI Alerts`;
+
+          // Call the Gmail MCP tool (send message directly) using user's registered email
+          callMcpTool("gmail_send_message", {
+            to: settings.email,
+            subject: `[FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}`,
+            body: emailBody,
+            userId: "me",
+            message: {
+              to: settings.email,
+              subject: `[FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}`,
+              raw: Buffer.from(
+                `To: ${settings.email}\r\n` +
+                `Subject: [FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}\r\n\r\n` +
+                emailBody
+              ).toString("base64url")
+            }
+          }).catch((err) => {
+            console.error(`[MCP Gmail Alert] Failed to send email for user ${uid} (${settings.email}):`, err);
+          });
+        }
+      }
     }
 
     if (alertsCreated > 0) await batch.commit();
@@ -228,6 +291,7 @@ async function createUserAlerts(
     return 0;
   }
 }
+
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");

@@ -10,6 +10,7 @@ import {
   Newspaper,
   Settings,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { useAuth } from "@/contexts/auth-context";
@@ -28,7 +29,9 @@ const NAV_ITEMS = [
   { href: ROUTES.alerts,    label: "Alerts",     icon: Bell },
   { href: ROUTES.watchlist, label: "Watchlist",  icon: Eye },
   { href: ROUTES.news,      label: "News",       icon: Newspaper },
+  { href: ROUTES.chatbot,   label: "AI Chatbot",  icon: MessageSquare },
 ];
+
 
 export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
   const pathname = usePathname();
