@@ -305,26 +305,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
       )}
 
       {/* Input container - Rounded pill layout as in the reference mockup */}
-      <div className="relative border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl rounded-full flex items-center pl-2 pr-2.5 py-1.5 focus-within:border-accent-500/30 transition-all duration-300">
-        {/* Attachment option (decorative) */}
-        <div className="flex items-center gap-1 px-3 text-slate-500 hover:text-slate-300 transition cursor-pointer text-xs font-medium border-r border-white/[0.08] shrink-0">
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m0 0L5.612 15.424l1.172-1.172 2.925 2.925"
-            />
-          </svg>
-          <span className="hidden sm:inline">Attachment</span>
-        </div>
-
+      <div className="relative border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl rounded-full flex items-center pl-4 pr-2.5 py-1.5 focus-within:border-accent-500/30 transition-all duration-300">
         <input
           type="text"
           value={input}
@@ -336,7 +317,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
             }
           }}
           placeholder="Type your finance question here..."
-          className="w-full bg-transparent text-sm py-2.5 px-4 outline-none placeholder-slate-600 font-sans text-gray-200"
+          className="w-full bg-transparent text-sm py-2 px-1 outline-none placeholder-slate-600 font-sans text-gray-200"
           disabled={isLoading}
         />
         <button

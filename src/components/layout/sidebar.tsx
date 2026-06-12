@@ -60,7 +60,7 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
                  bg-canvas-inset border-r border-glass-border shrink-0"
     >
       {/* Logo */}
-      <div className="h-16 flex items-center px-5 border-b border-glass-border">
+      <div className="h-16 flex items-center px-5">
         <Logo size="sm" />
       </div>
 
@@ -105,7 +105,7 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 py-4 border-t border-glass-border space-y-0.5">
+      <div className="px-3 py-4 space-y-0.5">
         <Link
           href={ROUTES.settings}
           className={cn(
