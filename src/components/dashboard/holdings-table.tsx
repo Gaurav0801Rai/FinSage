@@ -212,7 +212,7 @@ export function HoldingsTable({
 
               {/* Current price */}
               <div className="text-right">
-                <p className="text-sm font-mono text-white/80">
+                <p className="text-sm font-mono font-semibold text-white/90">
                   {holding.currency === "INR"
                     ? formatINR(holding.currentPrice)
                     : `$${holding.currentPrice.toLocaleString("en-US", {
@@ -231,7 +231,7 @@ export function HoldingsTable({
 
               {/* Market value */}
               <div className="text-right">
-                <p className="text-sm font-mono font-medium text-white/90">
+                <p className="text-sm font-mono font-semibold text-white/95">
                   {holding.currency === "INR"
                     ? formatINR(holding.marketValue)
                     : `$${holding.marketValue.toLocaleString()}`
@@ -242,7 +242,7 @@ export function HoldingsTable({
               {/* Total P&L */}
               <div className="text-right">
                 <p className={cn(
-                  "text-sm font-mono font-medium",
+                  "text-sm font-mono font-semibold",
                   isPnlGain ? "text-gain" : "text-loss"
                 )}>
                   {isPnlGain ? "+" : ""}
@@ -276,7 +276,7 @@ export function HoldingsTable({
                     ? <TrendingUp   className="w-3 h-3" />
                     : <TrendingDown className="w-3 h-3" />
                   }
-                  <span className="text-sm font-mono">
+                  <span className="text-sm font-mono font-semibold">
                     {formatPercent(holding.dayChangePercent)}
                   </span>
                 </div>

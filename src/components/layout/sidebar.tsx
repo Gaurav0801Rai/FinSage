@@ -57,7 +57,7 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
   return (
     <aside
       className="flex flex-col w-64 min-h-screen
-                 bg-canvas-elevated border-r border-glass-border shrink-0"
+                 bg-canvas-inset border-r border-glass-border shrink-0"
     >
       {/* Logo */}
       <div className="h-16 flex items-center px-5 border-b border-glass-border">
@@ -75,17 +75,16 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl",
-                "text-sm font-medium transition-all",
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all",
                 active
-                  ? "bg-accent-500/10 text-accent-400 border border-accent-500/20"
-                  : "text-white/50 hover:text-white hover:bg-white/[0.04] border border-transparent"
+                  ? "bg-accent-500/5 text-white border-accent-500/40 shadow-[0_0_12px_rgba(226,182,89,0.15)] text-[13px] font-medium"
+                  : "text-slate-500 hover:text-white hover:bg-white/[0.04] border-transparent text-[13px] font-normal"
               )}
             >
               <Icon
                 className={cn(
                   "w-4 h-4 shrink-0",
-                  active ? "text-accent-400" : "text-current"
+                  active ? "text-accent-500" : "text-current"
                 )}
               />
               <span className="flex-1">{label}</span>
@@ -110,11 +109,10 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
         <Link
           href={ROUTES.settings}
           className={cn(
-            "flex items-center gap-3 px-3 py-2.5 rounded-xl",
-            "text-sm font-medium transition-all",
+            "flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all",
             isActive(ROUTES.settings)
-              ? "bg-accent-500/10 text-accent-400 border border-accent-500/20"
-              : "text-white/50 hover:text-white hover:bg-white/[0.04] border border-transparent"
+              ? "bg-accent-500/5 text-white border-accent-500/40 shadow-[0_0_12px_rgba(226,182,89,0.15)] text-[13px] font-medium"
+              : "text-slate-500 hover:text-white hover:bg-white/[0.04] border-transparent text-[13px] font-normal"
           )}
         >
           <Settings className="w-4 h-4 shrink-0" />
@@ -132,10 +130,10 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
             />
           ) : (
             <div
-              className="w-7 h-7 rounded-full bg-accent-500/20
-                         border border-accent-500/30
+              className="w-7 h-7 rounded-full bg-[#1A365D]
+                         border border-[#1F4E79]/50
                          flex items-center justify-center
-                         text-xs font-semibold text-accent-400 shrink-0"
+                         text-xs font-semibold text-white shrink-0"
             >
               {initials}
             </div>

@@ -8,9 +8,9 @@ const config: Config = {
       colors: {
         // The canvas — deep space, not pure black (pure black is too harsh)
         canvas: {
-          DEFAULT: "#0A0A0B",
-          elevated: "#111113",
-          inset: "#070708",
+          DEFAULT: "#090D12",
+          elevated: "#121820",
+          inset: "#0E131A",
         },
 
         // Glass surface tokens — use these for cards
@@ -21,19 +21,26 @@ const config: Config = {
           "border-hover": "rgba(255, 255, 255, 0.12)",
         },
 
-        // Amber/gold accent — the signature color
+        // Gold accent — the signature color
         accent: {
           50: "#FFFBEB",
-          100: "#FEF3C7",
-          200: "#FDE68A",
-          300: "#FCD34D",
-          400: "#FBBF24", // primary glow
-          500: "#F59E0B", // main accent
-          600: "#D97706",
-          700: "#B45309",
-          800: "#92400E",
-          900: "#78350F",
-          glow: "rgba(251, 191, 36, 0.4)",
+          100: "#FDF5D2",
+          200: "#FBECA5",
+          300: "#F8DF78",
+          400: "#D4AF37", // secondary gold
+          500: "#E2B659", // main accent
+          600: "#C59B3F",
+          700: "#A6802C",
+          800: "#87661E",
+          900: "#684E11",
+          glow: "rgba(226, 182, 89, 0.4)",
+        },
+
+        // Trust Blue accent
+        trustBlue: {
+          DEFAULT: "#1F4E79",
+          secondary: "#1A365D",
+          glow: "rgba(31, 78, 121, 0.3)",
         },
 
         // Semantic finance colors
@@ -55,7 +62,7 @@ const config: Config = {
         // Alert severity colors
         severity: {
           high: "#F43F5E",
-          medium: "#F59E0B",
+          medium: "#E2B659",
           low: "#3B82F6",
         },
       },
@@ -83,9 +90,9 @@ const config: Config = {
       backgroundImage: {
         // The ambient glow used in root layout
         "amber-glow":
-          "radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.15), transparent 50%)",
+          "radial-gradient(circle at 50% 0%, rgba(226, 182, 89, 0.12), transparent 50%)",
         "amber-glow-subtle":
-          "radial-gradient(circle at 50% 50%, rgba(251, 191, 36, 0.08), transparent 70%)",
+          "radial-gradient(circle at 50% 50%, rgba(226, 182, 89, 0.06), transparent 70%)",
         "grid-pattern":
           "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
       },
@@ -117,8 +124,8 @@ const config: Config = {
           "100%": { opacity: "1", transform: "scale(1)" },
         },
         pulseGlow: {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(251, 191, 36, 0.3)" },
-          "50%": { boxShadow: "0 0 30px rgba(251, 191, 36, 0.5)" },
+          "0%, 100%": { boxShadow: "0 0 20px rgba(226, 182, 89, 0.3)" },
+          "50%": { boxShadow: "0 0 30px rgba(226, 182, 89, 0.5)" },
         },
         shimmer: {
           "0%": { backgroundPosition: "-200% 0" },

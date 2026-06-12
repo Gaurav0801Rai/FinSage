@@ -1,4 +1,4 @@
-# Portfolio Pulse — Project Context
+# FinSage — Project Context
 
 > This file is the single source of truth for the project.
 > Read this before making any changes to the codebase.
@@ -8,7 +8,7 @@
 
 ## What Is This App?
 
-**Portfolio Pulse** is an AI-powered portfolio intelligence platform.
+**FinSage** is an AI-powered portfolio intelligence platform.
 
 It monitors news, market events, and social signals across a user's stock and
 crypto holdings, then uses AI to surface only the events that actually matter
@@ -65,24 +65,24 @@ relevance analysis, impact alerts, and summaries.
 
 | Property | Value |
 |---|---|
-| Background | `#0A0A0B` (deep space black) |
-| Accent color | Amber/gold — `#FBBF24` (primary glow), `#F59E0B` (main) |
+| Background | `#090D12` (core interface background) |
+| Accent color | Gold/Blue dual accent — `#E2B659` (brand gold), `#1F4E79` (trust blue) |
 | Gain color | `#10B981` (emerald green) |
 | Loss color | `#F43F5E` (rose red) |
-| Card style | Glassmorphism — `bg-white/[0.03]` + `backdrop-blur-xl` |
+| Card style | Workspace Panel — `#121820` border and fill |
 | Card border | `border-white/[0.06]`, lifts to `white/[0.12]` on hover |
 | Font — UI | Geist Sans (via `geist` npm package) |
 | Font — numbers | Geist Mono (tabular-nums everywhere for financial data) |
-| Corner radius | `rounded-2xl` (generous but not playful) |
+| Corner radius | `rounded-[12px]` (12px standard) |
 | Motion | Framer Motion, 300ms page transitions, 60ms card stagger |
 
 All design tokens live in `tailwind.config.ts`.
 Reusable utility classes in `globals.css`:
-- `.glass-card` — the standard glassmorphism card
-- `.glass-card-hover` — adds hover lift effect
-- `.btn-glow` — amber glow primary button
+- `.glass-card` — workspace panel surface card styling
+- `.glass-card-hover` — adds hover background highlight
+- `.btn-glow` — solid gold CTA button
 - `.text-gradient` — white gradient headline text
-- `.text-gradient-amber` — amber gradient text
+- `.text-gradient-amber` — gold gradient text
 - `.skeleton` — shimmer loading state
 
 ---
@@ -484,3 +484,11 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
 - Bell icon in topbar not linked to /alerts
 - Alerts page empty (needs collectionGroup Firestore index on holdings)
 - All three will be fixed together in Phase 8
+
+### Phase 8 Polish (Rebrand)
+- Rebranded the platform name from "Portfolio Pulse" to "FinSage".
+- Visual styling overhaul: Replaced amber elements with premium gold (`#E2B659` / `#D4AF37`) and integrated the new FinTech Trust Blue (`#1F4E79` / `#1A365D`) color accents.
+- Surface refinement: Migrated cards from standard glassmorphism to Workspace Panel Surfaces (`#121820`), restricted borders, and updated corner radius specifications to a standard `12px` (`rounded-[12px]`).
+- Sidebar update: Updated navigation background to Deep Navy-Black (`#0E131A`), styled the active item with gold glow border shadows, and set inactive elements to `text-slate-500` (`#64748B`).
+- Emphasized key numeric metrics inside holdings lists by updating table field weights to `font-semibold` for rapid visual scanning.
+- Restyled alert boxes and system explanation indicators with dedicated gold frames and category badges.

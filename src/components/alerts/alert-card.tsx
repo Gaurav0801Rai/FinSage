@@ -186,15 +186,15 @@ export function AlertCard({ alert }: AlertCardProps) {
         {/* AI explanation */}
         <div
           className={cn(
-            "p-3 rounded-xl mb-3",
-            "bg-white/[0.03] border border-white/[0.06]"
+            "p-3 rounded-xl mb-3 border",
+            "bg-accent-500/[0.02] border-accent-500/15"
           )}
         >
-          <p className="text-xs text-white/30 font-medium mb-1.5 uppercase
+          <p className="text-xs text-accent-500 font-semibold mb-1.5 uppercase
                         tracking-wider">
             Why it matters
           </p>
-          <p className="text-sm text-white/70 leading-relaxed">
+          <p className="text-sm text-white/80 leading-relaxed font-sans">
             {alert.whyItMatters}
           </p>
         </div>
