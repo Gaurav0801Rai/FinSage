@@ -68,7 +68,7 @@ export default function FloatingChatbot() {
             <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
             <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-amber-500/5 blur-3xl pointer-events-none rounded-full" />
             
-            <div className="relative z-10 flex-1 flex flex-col">
+            <div className="relative z-10 flex-1 flex flex-col min-h-0">
               {/* Header Title inside Floating chat */}
               <div className="flex justify-between items-center pb-2 border-b border-white/[0.06] mb-3">
                 <div className="flex items-center gap-1.5">
@@ -86,7 +86,7 @@ export default function FloatingChatbot() {
               </div>
 
               {/* Chat Viewport */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 flex flex-col">
                 <ChatInterface isFloating={true} />
               </div>
             </div>
