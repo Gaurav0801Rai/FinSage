@@ -127,7 +127,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
   const heightClass = isFloating ? "h-[380px]" : "h-[calc(100vh-140px)]";
 
   return (
-    <div className={`flex flex-col ${heightClass} max-w-5xl mx-auto w-full relative`}>
+    <div className={`flex flex-col ${heightClass} w-full relative`}>
       {/* Header details */}
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.06]">
         <div>
