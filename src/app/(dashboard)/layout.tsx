@@ -5,6 +5,7 @@ import { cookies }        from "next/headers";
 import { adminAuth }      from "@/lib/firebase/admin";
 import { redirect }       from "next/navigation";
 import { ROUTES }         from "@/lib/constants";
+import FloatingChatbot    from "@/components/chatbot/floating-chatbot";
 
 async function verifySession() {
   try {
@@ -27,7 +28,7 @@ export default async function DashboardLayout({
   if (!valid) redirect(ROUTES.login);
 
   return (
-    <div className="flex min-h-screen bg-canvas">
+    <div className="flex min-h-screen bg-canvas relative">
       {/* Desktop sidebar — hidden on mobile */}
       <div className="hidden md:flex">
         <SidebarWrapper />
@@ -47,6 +48,9 @@ export default async function DashboardLayout({
           </PageTransition>
         </main>
       </div>
+
+      {/* Global floating chatbot widget */}
+      <FloatingChatbot />
     </div>
   );
 }

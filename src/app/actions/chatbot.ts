@@ -3,6 +3,8 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { getAuthenticatedUser } from "@/lib/firebase/session";
 import { fetchPrices } from "@/lib/price-service";
+import { getUSDToINR } from "@/lib/exchange-rate";
+
 
 interface ChatMessage {
   role: "user" | "model";
@@ -116,11 +118,18 @@ export async function askChatbot(
       }
     }
 
+    // Fetch USD to INR exchange rate to prevent AI rate assumptions
+    const usdToInrRate = await getUSDToINR().catch(() => 83.5);
+
     // 5. Construct System Instructions
     const systemPrompt = `You are FinSage Assistant, a premium, intelligent financial advisor AI chatbot.
 You are helping ${displayName} with their stock and cryptocurrency holdings.
 
 Below is the user's active holdings, live performance (calculated in their preferred base currency: ${baseCurrency}), and recent matching news or macro events.
+
+### CURRENT USD TO INR EXCHANGE RATE
+- 1 USD = ${usdToInrRate.toFixed(2)} INR
+(Note: You MUST use this exact exchange rate for converting currency values when analyzing holdings and prices. Do not assume or guess any other rate).
 
 ### USER PORTFOLIO COORDINATES (LIVE DATA)
 ${livePricesContext}

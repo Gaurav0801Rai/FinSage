@@ -5,7 +5,7 @@ import { ROUTES } from "@/lib/constants";
 import ChatInterface from "@/components/chatbot/chat-interface";
 
 export const metadata = {
-  title: "FinSage Chatbot — AI Market Intelligence",
+  title: "FinSage ChatBot — AI Market Intelligence",
   description: "Chat with your personalized AI agent about your portfolio holdings, live market performances, and relevant financial news.",
 };
 
@@ -20,7 +20,7 @@ export default async function ChatbotPage() {
       {/* Title block */}
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-gradient">
-          AI Chatbot
+          FinSage ChatBot
         </h1>
         <p className="text-sm text-gray-500 mt-1">
           Interactive chat based on your holdings and processed portfolio news.

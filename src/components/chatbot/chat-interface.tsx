@@ -17,7 +17,7 @@ const SUGGESTED_PROMPTS = [
   "Are there any geopolitical events impacting crypto/stocks today?",
 ];
 
-export default function ChatInterface() {
+export default function ChatInterface({ isFloating = false }: { isFloating?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "model",
@@ -124,24 +124,25 @@ export default function ChatInterface() {
     });
   };
 
+  const heightClass = isFloating ? "h-[380px]" : "h-[calc(100vh-140px)]";
+
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-5xl mx-auto w-full relative">
+    <div className={`flex flex-col ${heightClass} max-w-5xl mx-auto w-full relative`}>
       {/* Header details */}
-      <div className="flex justify-between items-center mb-4 pb-3 border-b border-white/[0.06]">
+      <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.06]">
         <div>
-          <h2 className="text-xl font-bold text-gradient-amber flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[#FBBF24]" />
+          <h2 className="text-sm font-bold text-gradient-amber flex items-center gap-1.5">
+            <Sparkles className="h-4 w-4 text-[#FBBF24]" />
             FinSage AI Agent
           </h2>
-          <p className="text-xs text-gray-500 font-mono">Powered by Gemini 2.5 Flash + Live Portfolio Context</p>
         </div>
         <button
           onClick={handleClearChat}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition"
           title="Clear Conversation"
         >
-          <Trash2 className="h-3.5 w-3.5" />
-          Clear Chat
+          <Trash2 className="h-3 w-3" />
+          Clear
         </button>
       </div>
 
