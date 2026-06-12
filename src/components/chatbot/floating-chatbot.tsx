@@ -42,6 +42,10 @@ export default function FloatingChatbot() {
               className="relative"
             >
               <Bot className="h-7 w-7 text-[#E2B659]" />
+              {/* Small speech-bubble with ... typing indicator */}
+              <span className="absolute -top-3.5 -left-3.5 bg-[#E2B659] text-[#090D12] text-[9px] font-bold px-1.5 py-0.5 rounded-full rounded-bl-none shadow-md animate-bounce">
+                ...
+              </span>
               {/* Little ambient pulse dot */}
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E2B659] opacity-75"></span>

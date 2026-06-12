@@ -200,19 +200,47 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
   return (
     <div className={`flex flex-col ${heightClass} w-full relative`}>
 
-      {/* Header details */}
-      <div className={`flex justify-between items-center mb-2 ${!isFloating ? "pb-2 border-b border-white/[0.06] mb-3" : ""}`}>
-        <div />
+      {/* Conversation Header */}
+      {!isFloating ? (
+        <div className="flex justify-between items-center pb-4 mb-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-3">
+            {/* Circular avatar with robot icon */}
+            <div className="h-10 w-10 rounded-full border border-accent-500/30 bg-accent-500/5 flex items-center justify-center text-accent-500">
+              <Bot className="h-5.5 w-5.5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-white leading-tight">
+                FinSage AI Assistant
+              </h4>
+              <p className="text-xs text-[#64748B] mt-0.5 font-sans">
+                Active | 24/7 Support
+              </p>
+            </div>
+          </div>
 
-        <button
-          onClick={handleClearChat}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition cursor-pointer"
-          title="Clear Conversation"
-        >
-          <Trash2 className="h-3 w-3" />
-          Clear
-        </button>
-      </div>
+          <button
+            onClick={handleClearChat}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition cursor-pointer"
+            title="Clear Conversation"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Clear</span>
+          </button>
+        </div>
+      ) : (
+        /* Compact Header for Floating Mode */
+        <div className="flex justify-between items-center mb-2">
+          <div />
+          <button
+            onClick={handleClearChat}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition cursor-pointer"
+            title="Clear Conversation"
+          >
+            <Trash2 className="h-3 w-3" />
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Chat Messages viewport */}
       <div
@@ -242,15 +270,25 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
                 {message.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
               </div>
 
-              {/* Bubble */}
+              {/* Bubble - updated to rounded-12px (#1F4E79 user fill / gold-charcoal assistant) with identity flags */}
               <div
                 className={cn(
-                  "p-4 rounded-2xl border font-sans",
+                  "p-4 rounded-[12px] border font-sans flex flex-col gap-1",
                   message.role === "user"
-                    ? "rounded-tr-none border-[#1F4E79]/40 bg-[#1A365D] text-white"
+                    ? "rounded-tr-none border-[#1F4E79]/30 bg-[#1F4E79] text-white"
                     : "rounded-tl-none border-accent-500/15 bg-accent-500/[0.02] text-gray-200"
                 )}
               >
+                {/* Identity flag (User in blue tone / Assistant in Gold) */}
+                <span
+                  className={cn(
+                    "text-[11px] font-bold font-sans uppercase tracking-wider mb-0.5",
+                    message.role === "user" ? "text-blue-300" : "text-[#E2B659]"
+                  )}
+                >
+                  {message.role === "user" ? "User" : "Assistant"}
+                </span>
+
                 <div className="text-sm font-sans whitespace-pre-line">
                   {formatMessageText(message.text)}
                 </div>
