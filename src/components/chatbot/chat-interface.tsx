@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Bot, User, Sparkles, AlertCircle, Trash2, ArrowRight } from "lucide-react";
 import { askChatbot, getChatHistory, saveChatMessage, clearChatHistory } from "@/app/actions/chatbot";
+import { cn } from "@/lib/utils";
 
 
 interface Message {
@@ -147,7 +148,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
         if (match.index > lastIdx) {
           parts.push(formatted.substring(lastIdx, match.index));
         }
-        parts.push(<strong key={match.index} className="text-amber-400 font-semibold">{match[1]}</strong>);
+        parts.push(<strong key={match.index} className="text-[#E2B659] font-semibold">{match[1]}</strong>);
         lastIdx = boldRegex.lastIndex;
       }
       if (lastIdx < formatted.length) {
@@ -231,22 +232,24 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
             >
               {/* Avatar */}
               <div
-                className={`flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center border ${
+                className={cn(
+                  "flex-shrink-0 h-9 w-9 rounded-full flex items-center justify-center border shrink-0",
                   message.role === "user"
-                    ? "border-amber-500/20 bg-amber-500/5 text-amber-400"
-                    : "border-white/[0.08] bg-white/[0.03] text-gray-400"
-                }`}
+                    ? "border-[#1F4E79]/50 bg-[#1A365D] text-white"
+                    : "border-accent-500/30 bg-accent-500/5 text-accent-500"
+                )}
               >
                 {message.role === "user" ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
               </div>
 
               {/* Bubble */}
               <div
-                className={`glass-card p-4 rounded-2xl ${
+                className={cn(
+                  "p-4 rounded-2xl border font-sans",
                   message.role === "user"
-                    ? "rounded-tr-none border-amber-500/25 bg-amber-500/[0.03]"
-                    : "rounded-tl-none border-white/[0.06] bg-white/[0.02]"
-                }`}
+                    ? "rounded-tr-none border-[#1F4E79]/40 bg-[#1A365D] text-white"
+                    : "rounded-tl-none border-accent-500/15 bg-accent-500/[0.02] text-gray-200"
+                )}
               >
                 <div className="text-sm font-sans whitespace-pre-line">
                   {formatMessageText(message.text)}
@@ -259,10 +262,10 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
         {/* Loading placeholder */}
         {isLoading && (
           <div className="flex gap-3 max-w-[85%] mr-auto">
-            <div className="flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center border border-white/[0.08] bg-white/[0.03] text-gray-400">
-              <Bot className="h-4 w-4 animate-pulse text-amber-400" />
+            <div className="flex-shrink-0 h-9 w-9 rounded-full flex items-center justify-center border border-accent-500/30 bg-accent-500/5 text-accent-500">
+              <Bot className="h-4 w-4 animate-pulse" />
             </div>
-            <div className="glass-card p-4 rounded-2xl rounded-tl-none border-white/[0.06] bg-white/[0.02] w-64">
+            <div className="p-4 rounded-2xl rounded-tl-none border border-accent-500/15 bg-accent-500/[0.02] w-64">
               <div className="space-y-2">
                 <div className="h-4 bg-white/5 rounded w-full skeleton" />
                 <div className="h-4 bg-white/5 rounded w-5/6 skeleton" />
@@ -292,7 +295,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
               <button
                 key={idx}
                 onClick={() => handleSend(prompt)}
-                className="px-3 py-1.5 text-xs text-gray-400 border border-white/[0.06] bg-white/[0.01] rounded-xl hover:border-amber-500/30 hover:text-amber-400 hover:bg-amber-500/[0.02] transition duration-200 text-left"
+                className="px-3 py-1.5 text-xs text-slate-400 border border-white/[0.06] bg-white/[0.01] rounded-xl hover:border-accent-500/30 hover:text-accent-500 hover:bg-accent-500/[0.02] transition duration-200 text-left cursor-pointer"
               >
                 {prompt}
               </button>
@@ -301,28 +304,48 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
         </div>
       )}
 
-      {/* Input container */}
-      <div className="relative border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl rounded-2xl flex items-center pr-2 focus-within:border-amber-500/30 transition-all duration-300">
-        <textarea
-          rows={1}
+      {/* Input container - Rounded pill layout as in the reference mockup */}
+      <div className="relative border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl rounded-full flex items-center pl-2 pr-2.5 py-1.5 focus-within:border-accent-500/30 transition-all duration-300">
+        {/* Attachment option (decorative) */}
+        <div className="flex items-center gap-1 px-3 text-slate-500 hover:text-slate-300 transition cursor-pointer text-xs font-medium border-r border-white/[0.08] shrink-0">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m0 0L5.612 15.424l1.172-1.172 2.925 2.925"
+            />
+          </svg>
+          <span className="hidden sm:inline">Attachment</span>
+        </div>
+
+        <input
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if (e.key === "Enter") {
               e.preventDefault();
               handleSend(input);
             }
           }}
-          placeholder="Ask about your holdings, news analysis, or macro events..."
-          className="w-full bg-transparent text-sm py-3.5 px-4 outline-none resize-none placeholder-gray-600 max-h-24 scrollbar-none font-sans text-gray-200"
+          placeholder="Type your finance question here..."
+          className="w-full bg-transparent text-sm py-2.5 px-4 outline-none placeholder-slate-600 font-sans text-gray-200"
           disabled={isLoading}
         />
         <button
           onClick={() => handleSend(input)}
           disabled={isLoading || !input.trim()}
-          className="flex-shrink-0 p-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-[#FBBF24] hover:bg-amber-500/10 hover:border-amber-500/40 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:border-amber-500/20 transition-all duration-300 cursor-pointer"
+          className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full bg-accent-500 text-[#090D12] hover:bg-accent-400 disabled:opacity-30 disabled:hover:bg-accent-500 font-semibold text-xs transition-all duration-300 cursor-pointer"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-3.5 w-3.5" />
+          <span>Send</span>
         </button>
       </div>
     </div>

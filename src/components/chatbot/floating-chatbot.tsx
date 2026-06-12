@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Sparkles } from "lucide-react";
+import { MessageSquare, X, Sparkles, Bot } from "lucide-react";
 import ChatInterface from "./chat-interface";
 
 export default function FloatingChatbot() {
@@ -16,9 +16,9 @@ export default function FloatingChatbot() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full flex items-center justify-center
-                   bg-gradient-to-tr from-[#F59E0B] to-[#FBBF24] text-[#0A0A0B]
-                   shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_25px_rgba(251,191,36,0.6)]
-                   transition-shadow duration-300 border border-[#F59E0B]/20 cursor-pointer"
+                   bg-gradient-to-tr from-[#1A365D] to-[#090D12] text-[#E2B659]
+                   shadow-[0_0_20px_rgba(226,182,89,0.35)] hover:shadow-[0_0_25px_rgba(226,182,89,0.5)]
+                   transition-shadow duration-300 border-2 border-[#E2B659] cursor-pointer"
         title="Chat with FinSage AI"
       >
         <AnimatePresence mode="wait">
@@ -30,7 +30,7 @@ export default function FloatingChatbot() {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <X className="h-6 w-6" />
+              <X className="h-6 w-6 text-[#E2B659]" />
             </motion.div>
           ) : (
             <motion.div
@@ -41,11 +41,11 @@ export default function FloatingChatbot() {
               transition={{ duration: 0.2 }}
               className="relative"
             >
-              <MessageSquare className="h-6 w-6" />
+              <Bot className="h-7 w-7 text-[#E2B659]" />
               {/* Little ambient pulse dot */}
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E2B659] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#E2B659]"></span>
               </span>
             </motion.div>
           )}
