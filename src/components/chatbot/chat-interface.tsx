@@ -26,6 +26,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
   const [error, setError] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatViewportRef = useRef<HTMLDivElement>(null);
 
   // Load chat history on mount
   useEffect(() => {
@@ -54,9 +55,15 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     loadHistory();
   }, []);
 
-  // Auto-scroll to latest message
+  // Auto-scroll to latest message in the viewport (prevents parent window/container scroll)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatViewportRef.current) {
+      const behavior = isHistoryLoading ? "auto" : "smooth";
+      chatViewportRef.current.scrollTo({
+        top: chatViewportRef.current.scrollHeight,
+        behavior,
+      });
+    }
   }, [messages, isLoading, isHistoryLoading]);
 
   const handleSend = async (textToSend: string) => {
@@ -165,7 +172,7 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     });
   };
 
-  const heightClass = isFloating ? "h-[380px]" : "h-[calc(100vh-140px)]";
+  const heightClass = isFloating ? "h-full" : "h-[calc(100vh-140px)]";
 
   if (isHistoryLoading) {
 
@@ -193,12 +200,12 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     <div className={`flex flex-col ${heightClass} w-full relative`}>
 
       {/* Header details */}
-      <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.06]">
+      <div className={`flex justify-between items-center mb-2 ${!isFloating ? "pb-2 border-b border-white/[0.06] mb-3" : ""}`}>
         <div />
 
         <button
           onClick={handleClearChat}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition"
+          className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition cursor-pointer"
           title="Clear Conversation"
         >
           <Trash2 className="h-3 w-3" />
@@ -207,7 +214,10 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
       </div>
 
       {/* Chat Messages viewport */}
-      <div className="flex-1 overflow-y-auto mb-4 pr-2 space-y-4 scrollbar-thin">
+      <div
+        ref={chatViewportRef}
+        className="flex-1 overflow-y-auto mb-4 pr-2 space-y-4 scrollbar-thin"
+      >
         <AnimatePresence initial={false}>
           {messages.map((message, index) => (
             <motion.div
