@@ -130,12 +130,8 @@ export default function ChatInterface({ isFloating = false }: { isFloating?: boo
     <div className={`flex flex-col ${heightClass} w-full relative`}>
       {/* Header details */}
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-white/[0.06]">
-        <div>
-          <h2 className="text-sm font-bold text-gradient-amber flex items-center gap-1.5">
-            <Sparkles className="h-4 w-4 text-[#FBBF24]" />
-            FinSage AI Agent
-          </h2>
-        </div>
+        <div />
+
         <button
           onClick={handleClearChat}
           className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium text-rose-400 border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 transition"
