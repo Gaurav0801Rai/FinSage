@@ -1,0 +1,77 @@
+﻿Portfolio Pulse — Project Handoff Summary
+Original Brief
+Build a production-quality, AI-powered portfolio intelligence platform called "Portfolio Pulse" for personal use and portfolio showcasing. Premium dark-themed finance UI (Bloomberg-modernized, Linear/Vercel-inspired), built primarily through AI-assisted development by a non-experienced developer.
+Core product: Monitors stocks (NSE/BSE), crypto, mutual funds, market/geopolitical events, and news. Uses AI to determine relevance to the user's specific holdings and generates impact alerts with explanations. Explicitly NOT a trading platform, broker integration, prediction system, or financial advice tool — monitoring, filtering, relevance analysis, and summaries only.
+Tech Stack (locked in)
+* Frontend: Next.js 14 (App Router), TypeScript, Tailwind CSS, Framer Motion, Recharts, shadcn/ui
+* Backend: Firebase Auth, Firestore (region: asia-south2 Delhi), Firebase Admin SDK
+* AI: Gemini API — currently gemini-2.5-flash via direct REST /v1/ endpoint (not SDK, not v1beta)
+* OCR: Gemini Vision (base64 inline images, never persisted)
+* Hosting: Vercel (not yet deployed)
+* Data sources: Yahoo Finance (NSE/BSE prices), CoinGecko (crypto prices), RSS feeds + NewsAPI (news)
+Critical Architecture Decisions
+1. No Firebase Storage — Delhi Firestore region isn't eligible for no-cost Storage tier. Screenshots go to Gemini Vision as base64, never persisted.
+2. Two-stage news filter — Stage 1: cheap ticker-dictionary string matching (src/lib/ticker-dictionary.ts). Stage 2: Gemini AI analysis only on survivors. Keeps AI costs near zero.
+3. OCR review required — extracted holdings always shown in editable table before Firestore commit. Manual "add holding" fallback always available.
+4. Soft deletes — deletedAt: Timestamp | null on holdings/watchlist, never hard delete.
+5. Server/Admin SDK split — src/lib/firebase/admin.ts (server-only), src/lib/firebase/client.ts (browser). Session cookie pp_session, httpOnly. Middleware does cookie-existence check only (Edge runtime can't run Admin SDK); full verifySessionCookie happens in dashboard layout.
+6. Firestore Timestamps must be converted to ISO strings or null before passing from Server to Client Components — raw Timestamp objects throw "Only plain objects can be passed" errors.
+7. fetchPrices() has server-only — client components must call it via /api/prices POST route.
+Phase Status
+Phase
+	Status
+	Notes
+	1A — Foundation & Design System
+	✅ Complete
+	Next.js scaffold, amber/gold dark glassmorphism theme, Tailwind tokens, Geist fonts, landing page
+	1B — Auth, Session, Dashboard Shell
+	✅ Complete
+	Email/password auth, session cookies, middleware, sidebar+topbar shell, Firestore rules
+	2 — Portfolio Ingestion
+	✅ Complete
+	Drag-drop upload, Gemini Vision OCR, editable review table, manual add, save to users/{uid}/holdings
+	3 — Dashboard
+	✅ Complete
+	Portfolio hero (animated counter), stats row, allocation donut, performance chart (simulated), holdings table, live prices
+	4 — News Ingestion Pipeline
+	✅ Complete
+	RSS (6 sources) + NewsAPI, ticker-dictionary Stage 1 filter, Vercel cron routes (/api/cron/ingest-news, /api/cron/process-news)
+	5 — Alerts System
+	✅ Complete
+	Per-user AI alerts, severity colors, mark read/dismiss, sidebar badge via SidebarWrapper pattern
+	6 — Settings
+	✅ Complete
+	Profile, currency/alert preferences, danger zone (delete all holdings)
+	7 — Watchlist
+	✅ Complete
+	Add/remove assets, live prices via /api/prices, move-to-portfolio modal
+	8 — Polish
+	🔄 Nearly done
+	Bell icon, mobile nav, error boundaries, 48h news filter, skeletons all done. In progress: fixing Firestore Timestamp serialization bug on /alerts page (just resolved). Not started: USD/INR exchange rate (src/lib/exchange-rate.ts — file written but not yet integrated)
+	Known Issues / Unfinished Items
+1. Exchange rate integration — src/lib/exchange-rate.ts (Yahoo Finance USDINR=X, 1hr cache) was written but never wired into the dashboard. Currency toggle in Settings only changes display formatting, not actual conversion.
+2. Gemini occasional JSON parse failures — ~30% of process-news runs skip articles where Gemini returns malformed JSON (unescaped quotes in baseImpact). Articles get marked processed: true and skipped — not blocking but loses some alerts.
+3. Cron auth disabled — CRON_SECRET check was removed from both cron routes for local testing. Must re-add before production deploy so random people can't trigger your Gemini quota.
+4. Cron doesn't run locally — /api/cron/ingest-news and /api/cron/process-news must be manually visited in browser during dev. Only Vercel's cron scheduler (vercel.json) runs them automatically every 15/5 min.
+5. Reddit integration — planned but never built (OAuth complexity deferred).
+6. Not yet deployed to Vercel.
+Required Firestore Composite Indexes (all created)
+* news: processed ASC + fetchedAt ASC
+* news: publishedAt ASC + __name__ (for the 48h filter + orderBy)
+* holdings (collection group): deletedAt ASC + symbol ASC
+* alerts (per-user subcollection): dismissed ASC + createdAt DESC
+Environment Variables in Use
+NEXT_PUBLIC_FIREBASE_* (6 vars — client config)
+FIREBASE_ADMIN_PROJECT_ID / CLIENT_EMAIL / PRIVATE_KEY
+GEMINI_API_KEY
+NEWS_API_KEY
+CRON_SECRET (currently unused — checks removed)
+NEXT_PUBLIC_APP_URL
+
+
+Immediate Next Steps (where you're picking up)
+1. Confirm /alerts page loads correctly after the Timestamp serialization fix (last thing done)
+2. Decide: wire up exchange-rate.ts, or skip for now
+3. Re-add CRON_SECRET checks to both cron routes
+4. Deploy to Vercel — connect repo, add all env vars, verify vercel.json cron schedules activate
+________________

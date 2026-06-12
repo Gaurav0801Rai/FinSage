@@ -1,0 +1,4 @@
+export const SESSION_COOKIE_NAME = "pp_session";
+export const SESSION_EXPIRY_DAYS = 14;
+export const SESSION_EXPIRY_SECONDS = SESSION_EXPIRY_DAYS * 24 * 60 * 60;
+export const SESSION_EXPIRY_MS = SESSION_EXPIRY_SECONDS * 1000;
