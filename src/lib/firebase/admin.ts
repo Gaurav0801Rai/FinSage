@@ -11,10 +11,17 @@ import { getFirestore, type Firestore } from "firebase-admin/firestore";
 function getAdminApp(): App {
   if (getApps().length > 0) return getApps()[0];
 
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(
-    /\\n/g,
-    "\n"
-  );
+  let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  if (privateKey) {
+    privateKey = privateKey.trim();
+    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+      privateKey = privateKey.slice(1, -1).trim();
+    }
+    if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
+      privateKey = privateKey.slice(1, -1).trim();
+    }
+    privateKey = privateKey.replace(/\\n/g, "\n");
+  }
 
   if (!privateKey || !process.env.FIREBASE_ADMIN_PROJECT_ID) {
     throw new Error(
