@@ -56,6 +56,48 @@ export async function markAllAlertsRead(): Promise<void> {
   }
 }
 
+// Mark all alerts read for a specific symbol/category
+export async function markCategoryAlertsRead(symbol: string): Promise<void> {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) return;
+
+    const unreadSnap = await adminDb
+      .collection("users")
+      .doc(user.uid)
+      .collection("alerts")
+      .where("readAt", "==", null)
+      .where("dismissed", "==", false)
+      .get();
+
+    if (unreadSnap.empty) return;
+
+    const batch = adminDb.batch();
+    const now = FieldValue.serverTimestamp();
+    let count = 0;
+
+    unreadSnap.docs.forEach((doc) => {
+      const data = doc.data();
+      const affectedSymbols = (data.affectedSymbols as string[]) ?? [];
+      const belongsToCategory =
+        (symbol === "" && affectedSymbols.length === 0) ||
+        (symbol !== "" && affectedSymbols.some((s) => s.toUpperCase() === symbol.toUpperCase()));
+
+      if (belongsToCategory) {
+        batch.update(doc.ref, { readAt: now });
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      await batch.commit();
+      revalidatePath("/alerts");
+    }
+  } catch (err) {
+    console.error("markCategoryAlertsRead error:", err);
+  }
+}
+
 // Dismiss an alert (hides it from the list)
 export async function dismissAlert(alertId: string): Promise<void> {
   try {

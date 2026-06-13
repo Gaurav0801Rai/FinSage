@@ -3,6 +3,7 @@ import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { AlertCard }          from "@/components/alerts/alert-card";
 import { AlertsEmpty }        from "@/components/alerts/alerts-empty";
 import { Bell }               from "lucide-react";
+import { MarkCategoryReadButton } from "@/components/alerts/mark-category-read-button";
 
 async function getAlertsData() {
   try {
@@ -201,12 +202,17 @@ export default async function AlertsPage() {
                     </span>
                   )}
                 </div>
-                <span className="text-xs font-semibold text-accent-400 bg-accent-500/[0.04] border border-accent-500/10 px-2.5 py-1 rounded-full">
-                  {group.unreadCount > 0
-                    ? `${group.unreadCount} new`
-                    : `${group.alerts.length} total`
-                  }
-                </span>
+                <div className="flex items-center gap-2.5">
+                  {group.unreadCount > 0 && (
+                    <MarkCategoryReadButton symbol={group.symbol} />
+                  )}
+                  <span className="text-xs font-semibold text-accent-400 bg-accent-500/[0.04] border border-accent-500/10 px-2.5 py-1 rounded-full">
+                    {group.unreadCount > 0
+                      ? `${group.unreadCount} new`
+                      : `${group.alerts.length} total`
+                    }
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-4">
