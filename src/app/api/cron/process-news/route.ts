@@ -46,6 +46,8 @@ Severity guide:
 
 Do not include any explanation outside the JSON. Return raw JSON only.`;
 
+  let geminiResult: { rawText: string; tokens: number } | null = null;
+
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
@@ -64,6 +66,12 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
       });
 
       if (res.status === 429) {
+        const errText = await res.text();
+        console.log(`Gemini 429 Rate limited/Quota exceeded:`, errText.slice(0, 150));
+        if (errText.toLowerCase().includes("quota")) {
+          console.log("Gemini quota exhausted. Breaking attempt loop to trigger Groq fallback.");
+          break;
+        }
         console.log(
           `Rate limited on attempt ${attempt + 1}, waiting 5s...`
         );
@@ -74,12 +82,12 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
       if (res.status === 400) {
         const errBody = await res.text();
         console.warn(`Gemini 400 error:`, errBody.slice(0, 300));
-        return null;
+        break;
       }
 
       if (!res.ok) {
         console.warn(`Gemini failed with status: ${res.status}`);
-        return null;
+        break;
       }
 
       const data = await res.json();
@@ -87,79 +95,127 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
         data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
       const tokens = data?.usageMetadata?.totalTokenCount ?? 0;
 
-      if (!rawText) {
-        console.warn("Gemini returned empty response");
-        return null;
+      if (rawText) {
+        geminiResult = { rawText, tokens };
+        break;
       }
-
-      // Aggressively clean the response
-      let cleaned = rawText.trim();
-
-      // Remove markdown code fences
-      cleaned = cleaned.replace(/^```json\s*/i, "");
-      cleaned = cleaned.replace(/^```\s*/i, "");
-      cleaned = cleaned.replace(/```\s*$/i, "");
-      cleaned = cleaned.trim();
-
-      // Find the JSON object — extract from first { to last }
-      const firstBrace = cleaned.indexOf("{");
-      const lastBrace = cleaned.lastIndexOf("}");
-
-      if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
-        console.warn(
-          "No valid JSON object found in response:",
-          cleaned.slice(0, 200)
-        );
-        return null;
-      }
-
-      const jsonString = cleaned.slice(firstBrace, lastBrace + 1);
-
-      let parsed: Record<string, unknown>;
-
-      try {
-        parsed = JSON.parse(jsonString);
-      } catch (parseErr) {
-        console.warn(
-          "JSON parse failed:",
-          jsonString.slice(0, 200)
-        );
-        return null;
-      }
-
-      if (!parsed.baseImpact || !parsed.severity) {
-        console.warn("Response missing required fields:", parsed);
-        return null;
-      }
-
-      return {
-        baseImpact: String(parsed.baseImpact).slice(0, 500),
-        affectedSectors: Array.isArray(parsed.affectedSectors)
-          ? (parsed.affectedSectors as string[]).slice(0, 10)
-          : [],
-        affectedSymbols: Array.isArray(parsed.affectedSymbols)
-          ? (parsed.affectedSymbols as string[]).slice(0, 10)
-          : [],
-        severity: (
-          ["high", "medium", "low"].includes(
-            parsed.severity as string
-          )
-            ? parsed.severity
-            : "low"
-        ) as "high" | "medium" | "low",
-        confidence:
-          typeof parsed.confidence === "number"
-            ? Math.min(1, Math.max(0, parsed.confidence))
-            : 0.5,
-        tokensUsed: tokens,
-      };
     } catch (err) {
       console.warn(`Gemini attempt ${attempt + 1} threw:`, err);
       if (attempt < 2) await sleep(5000);
     }
   }
 
-  return null;
+  let rawText = geminiResult?.rawText ?? "";
+  let tokensUsed = geminiResult?.tokens ?? 0;
+
+  // Fallback to Groq if Gemini failed/exhausted quota
+  if (!rawText && process.env.GROQ_API_KEY) {
+    console.log("Attempting fallback to Groq API for news analysis...");
+    try {
+      const url = "https://api.groq.com/openai/v1/chat/completions";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional financial analyst. You must return ONLY raw valid JSON matching the schema requested. No markdown formatting, no explanation.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.1,
+          response_format: { type: "json_object" },
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        rawText = data?.choices?.[0]?.message?.content ?? "";
+        tokensUsed = data?.usage?.total_tokens ?? 0;
+        console.log("Groq fallback successful!");
+      } else {
+        const errText = await res.text();
+        console.warn("Groq fallback failed:", res.status, errText.slice(0, 300));
+      }
+    } catch (err) {
+      console.error("Groq fallback error:", err);
+    }
+  }
+
+  if (!rawText) {
+    console.warn("Both Gemini and Groq fallback failed to return analysis text.");
+    return null;
+  }
+
+  // Aggressively clean the response
+  let cleaned = rawText.trim();
+
+  // Remove markdown code fences
+  cleaned = cleaned.replace(/^```json\s*/i, "");
+  cleaned = cleaned.replace(/^```\s*/i, "");
+  cleaned = cleaned.replace(/```\s*$/i, "");
+  cleaned = cleaned.trim();
+
+  // Find the JSON object — extract from first { to last }
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+    console.warn(
+      "No valid JSON object found in response:",
+      cleaned.slice(0, 200)
+    );
+    return null;
+  }
+
+  const jsonString = cleaned.slice(firstBrace, lastBrace + 1);
+
+  let parsed: Record<string, unknown>;
+
+  try {
+    parsed = JSON.parse(jsonString);
+  } catch (parseErr) {
+    console.warn(
+      "JSON parse failed:",
+      jsonString.slice(0, 200)
+    );
+    return null;
+  }
+
+  if (!parsed.baseImpact || !parsed.severity) {
+    console.warn("Response missing required fields:", parsed);
+    return null;
+  }
+
+  return {
+    baseImpact: String(parsed.baseImpact).slice(0, 500),
+    affectedSectors: Array.isArray(parsed.affectedSectors)
+      ? (parsed.affectedSectors as string[]).slice(0, 10)
+      : [],
+    affectedSymbols: Array.isArray(parsed.affectedSymbols)
+      ? (parsed.affectedSymbols as string[]).slice(0, 10)
+      : [],
+    severity: (
+      ["high", "medium", "low"].includes(
+        parsed.severity as string
+      )
+        ? parsed.severity
+        : "low"
+    ) as "high" | "medium" | "low",
+    confidence:
+      typeof parsed.confidence === "number"
+        ? Math.min(1, Math.max(0, parsed.confidence))
+        : 0.5,
+    tokensUsed: tokensUsed,
+  };
 }
 
 const SEVERITY_LEVELS: Record<string, number> = { low: 1, medium: 2, high: 3 };
@@ -311,11 +367,53 @@ async function generateCombinedSummary(
     });
     if (res.ok) {
       const data = await res.json();
-      return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (text) return text;
     }
   } catch (err) {
-    console.error("Combined summary error:", err);
+    console.error("Combined summary Gemini error:", err);
   }
+
+  // Try Groq fallback
+  if (process.env.GROQ_API_KEY) {
+    try {
+      console.log("Attempting fallback to Groq for combined summary...");
+      const url = "https://api.groq.com/openai/v1/chat/completions";
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: "You are a professional financial analyst. Return only the 2-sentence summary requested.",
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.2,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data?.choices?.[0]?.message?.content?.trim();
+        if (text) {
+          console.log("Groq combined summary fallback successful!");
+          return text;
+        }
+      }
+    } catch (err) {
+      console.error("Combined summary Groq fallback error:", err);
+    }
+  }
+
   return alerts.map(a => `- ${a.whyItMatters}`).join("\n");
 }
 
