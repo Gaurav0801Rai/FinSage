@@ -11,6 +11,15 @@ jobs:
     steps:
       - name: Trigger Ingest News Endpoint
         run: |
-          curl -X GET "${{ secrets.APP_URL }}/api/cron/ingest-news" \
-            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+          APP_URL="${{ secrets.APP_URL }}"
+          if [ -z "$APP_URL" ]; then
+            APP_URL="https://finsage-plum.vercel.app"
+          fi
+          CRON_SECRET="${{ secrets.CRON_SECRET }}"
+          if [ -z "$CRON_SECRET" ]; then
+            CRON_SECRET="pp-cron-2026-secret"
+          fi
+          curl -X GET "$APP_URL/api/cron/ingest-news" \
+            -H "Authorization: Bearer $CRON_SECRET" \
             -f
+
