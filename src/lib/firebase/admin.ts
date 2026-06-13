@@ -21,6 +21,7 @@ function getAdminApp(): App {
       privateKey = privateKey.slice(1, -1).trim();
     }
     privateKey = privateKey.replace(/\\n/g, "\n");
+    privateKey = privateKey.replace(/\r/g, "");
   }
 
   if (!privateKey || !process.env.FIREBASE_ADMIN_PROJECT_ID) {

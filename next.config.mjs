@@ -7,6 +7,9 @@ if (key) {
   console.log("Key ends with END (trimmed):", key.trim().endsWith("-----END PRIVATE KEY-----"));
   console.log("Key contains literal \\n?", key.includes("\\n"));
   console.log("Key contains actual newline?", key.includes("\n"));
+  console.log("Number of \\r (carriage returns):", (key.match(/\r/g) || []).length);
+  console.log("Number of \\n (newlines):", (key.match(/\n/g) || []).length);
+  console.log("Cleaned key length (no \\r):", key.replace(/\r/g, "").length);
   console.log("Key starts with quotes?", key.startsWith('"') || key.startsWith("'"));
   console.log("First 60 chars of key:", key.substring(0, 60));
   console.log("Last 60 chars of key:", key.substring(key.length - 60));
