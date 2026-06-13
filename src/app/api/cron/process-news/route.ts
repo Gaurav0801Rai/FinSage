@@ -48,7 +48,7 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
       const res = await fetch(url, {
         method: "POST",
