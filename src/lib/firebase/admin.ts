@@ -29,13 +29,28 @@ function getAdminApp(): App {
     );
   }
 
-  return initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey,
-    }),
-  });
+  try {
+    return initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        privateKey,
+      }),
+    });
+  } catch (err: any) {
+    const errorDetails = {
+      message: err.message,
+      keyLength: privateKey?.length,
+      startsWithBegin: privateKey?.startsWith("-----BEGIN PRIVATE KEY-----"),
+      endsWithEnd: privateKey?.trim().endsWith("-----END PRIVATE KEY-----"),
+      containsEscapedN: privateKey?.includes("\\n"),
+      containsNewline: privateKey?.includes("\n"),
+      first50: privateKey?.substring(0, 50),
+      last50: privateKey?.substring((privateKey?.length || 0) - 50),
+    };
+    console.error("Firebase cert init failed. Key details:", JSON.stringify(errorDetails));
+    throw err;
+  }
 }
 
 export const adminAuth: Auth = getAuth(getAdminApp());
