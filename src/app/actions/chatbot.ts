@@ -6,6 +6,7 @@ import { fetchPrices } from "@/lib/price-service";
 import { getUSDToINR } from "@/lib/exchange-rate";
 import { FieldValue } from "firebase-admin/firestore";
 import { callGroq } from "@/lib/groq";
+import { callGemini } from "@/lib/gemini";
 
 
 
@@ -187,49 +188,45 @@ Maintain this context in your replies. Use the conversation history to provide c
     } else {
       console.log("[Chatbot] GROQ_API_KEY not found. Falling back to Gemini API...");
       
-      const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-      if (!GEMINI_API_KEY) {
+      const hasGeminiKeys = !!(process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEYS);
+      if (!hasGeminiKeys) {
         return { success: false, error: "Neither Groq nor Gemini API Key is configured on the server." };
       }
 
       const GEMINI_MODEL = "gemini-2.5-flash";
-      const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
       const contents = [
         ...history,
         { role: "user", parts: [{ text: userMessage }] }
       ];
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents,
-          systemInstruction: {
-            parts: [{ text: systemPrompt }]
+      try {
+        const data = await callGemini(
+          `models/${GEMINI_MODEL}:generateContent`,
+          {
+            contents,
+            systemInstruction: {
+              parts: [{ text: systemPrompt }]
+            },
+            generationConfig: {
+              temperature: 0.2,
+              maxOutputTokens: 2048,
+            }
           },
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 2048,
-          }
-        }),
-        next: { revalidate: 0 },
-      });
+          "v1"
+        );
 
-      if (!response.ok) {
-        const errBody = await response.text();
-        console.error("[Chatbot] Gemini API error:", errBody);
-        return { success: false, error: "Failed to generate AI response via Gemini. Status: " + response.status };
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!reply) {
+          return { success: false, error: "Received empty reply from Gemini." };
+        }
+
+        return { success: true, response: reply };
+      } catch (geminiErr: any) {
+        console.error("[Chatbot] Gemini rotation API fallback failed:", geminiErr);
+        return { success: false, error: "Failed to generate AI response via Gemini: " + geminiErr.message };
       }
-
-      const data = await response.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!reply) {
-        return { success: false, error: "Received empty reply from Gemini." };
-      }
-
-      return { success: true, response: reply };
     }
   } catch (err) {
     console.error("askChatbot error:", err);

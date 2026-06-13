@@ -3,8 +3,8 @@ import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { callMcpTool } from "@/lib/mcp-client";
 import { callGroq } from "@/lib/groq";
+import { callGemini } from "@/lib/gemini";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_MODEL = "gemini-2.5-flash";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -22,25 +22,21 @@ async function generateCombinedSummary(
   Return only the 2-sentence summary.`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const data = await callGemini(
+      `models/${GEMINI_MODEL}:generateContent`,
+      {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
           maxOutputTokens: 250,
         },
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-      if (text) return text;
-    }
-  } catch (err) {
-    console.error("Combined summary Gemini error:", err);
+      },
+      "v1"
+    );
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (text) return text;
+  } catch (err: any) {
+    console.error("Combined summary Gemini error:", err.message || err);
   }
 
   // Try Groq fallback

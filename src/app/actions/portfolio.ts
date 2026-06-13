@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { getAuthenticatedUser } from "@/lib/firebase/session";
 import { FieldValue } from "firebase-admin/firestore";
 import type { ExtractedHolding, SaveHoldingsResult } from "@/types/portfolio";
+import { callGemini } from "@/lib/gemini";
 
 // ─── Gemini API direct fetch ──────────────────────────────────────────────────
 // We call the REST API directly instead of using the SDK because the SDK
@@ -25,13 +26,10 @@ async function callGeminiVision(
   let lastError = "";
 
   for (const model of MODELS_TO_TRY) {
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await callGemini(
+        `models/${model}:generateContent`,
+        {
           contents: [
             {
               parts: [
@@ -49,30 +47,10 @@ async function callGeminiVision(
             temperature: 0.1,
             maxOutputTokens: 2048,
           },
-        }),
-      });
+        },
+        "v1"
+      );
 
-      if (response.status === 429) {
-        lastError = `${model}: rate limited`;
-        console.log(`Model ${model} rate limited, waiting 10s then trying next...`);
-        await new Promise((resolve) => setTimeout(resolve, 10000));
-        continue;
-      }
-
-      if (response.status === 404) {
-        lastError = `${model}: not found`;
-        console.log(`Model ${model} not found, trying next...`);
-        continue;
-      }
-
-      if (!response.ok) {
-        const errText = await response.text();
-        lastError = `${model}: ${response.status} ${errText}`;
-        console.log(`Model ${model} error: ${response.status}, trying next...`);
-        continue;
-      }
-
-      const data = await response.json();
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!text) {
@@ -80,16 +58,16 @@ async function callGeminiVision(
         continue;
       }
 
-      console.log(`✓ Gemini responded using model: ${model}`);
+      console.log(`✓ Gemini responded using model: ${model} (via key rotation)`);
       return text;
 
-    } catch (err) {
-      lastError = `${model}: ${String(err)}`;
+    } catch (err: any) {
+      lastError = `${model}: ${err.message || String(err)}`;
       continue;
     }
   }
 
-  throw new Error(`All Gemini models failed. Last error: ${lastError}`);
+  throw new Error(`All Gemini models/keys failed. Last error: ${lastError}`);
 }
 
 // ─── OCR Prompt ───────────────────────────────────────────────────────────────

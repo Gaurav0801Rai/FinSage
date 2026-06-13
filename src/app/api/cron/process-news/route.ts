@@ -3,9 +3,9 @@ import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { callMcpTool } from "@/lib/mcp-client";
 import { callGroq } from "@/lib/groq";
+import { callGemini } from "@/lib/gemini";
 
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_MODEL = "gemini-2.5-flash";
 const BATCH_SIZE = 3;
 
@@ -47,67 +47,28 @@ Severity guide:
 
 Do not include any explanation outside the JSON. Return raw JSON only.`;
 
-  let geminiResult: { rawText: string; tokens: number } | null = null;
+  let rawText = "";
+  let tokensUsed = 0;
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  try {
+    const data = await callGemini(
+      `models/${GEMINI_MODEL}:generateContent`,
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 1024,
+          responseMimeType: "application/json",
+        },
+      },
+      "v1"
+    );
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1024,
-            responseMimeType: "application/json",
-          },
-        }),
-      });
-
-      if (res.status === 429) {
-        const errText = await res.text();
-        console.log(`Gemini 429 Rate limited/Quota exceeded:`, errText.slice(0, 150));
-        if (errText.toLowerCase().includes("quota")) {
-          console.log("Gemini quota exhausted. Breaking attempt loop to trigger Groq fallback.");
-          break;
-        }
-        console.log(
-          `Rate limited on attempt ${attempt + 1}, waiting 5s...`
-        );
-        await sleep(5000);
-        continue;
-      }
-
-      if (res.status === 400) {
-        const errBody = await res.text();
-        console.warn(`Gemini 400 error:`, errBody.slice(0, 300));
-        break;
-      }
-
-      if (!res.ok) {
-        console.warn(`Gemini failed with status: ${res.status}`);
-        break;
-      }
-
-      const data = await res.json();
-      const rawText =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-      const tokens = data?.usageMetadata?.totalTokenCount ?? 0;
-
-      if (rawText) {
-        geminiResult = { rawText, tokens };
-        break;
-      }
-    } catch (err) {
-      console.warn(`Gemini attempt ${attempt + 1} threw:`, err);
-      if (attempt < 2) await sleep(5000);
-    }
+    rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    tokensUsed = data?.usageMetadata?.totalTokenCount ?? 0;
+  } catch (err: any) {
+    console.warn(`[Gemini Route] Main Gemini API call failed, will try Groq:`, err.message || err);
   }
-
-  let rawText = geminiResult?.rawText ?? "";
-  let tokensUsed = geminiResult?.tokens ?? 0;
 
   // Fallback to Groq if Gemini failed/exhausted quota
   const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
@@ -341,25 +302,21 @@ async function generateCombinedSummary(
   Return only the 2-sentence summary.`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    const data = await callGemini(
+      `models/${GEMINI_MODEL}:generateContent`,
+      {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
           maxOutputTokens: 250,
         },
-      }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-      if (text) return text;
-    }
-  } catch (err) {
-    console.error("Combined summary Gemini error:", err);
+      },
+      "v1"
+    );
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    if (text) return text;
+  } catch (err: any) {
+    console.error("Combined summary Gemini error:", err.message || err);
   }
 
   // Try Groq fallback
