@@ -8,21 +8,40 @@ import {
 import { getAuth, type Auth, type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 
+function cleanPrivateKey(key: string): string {
+  let cleaned = key.trim();
+  if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+
+  cleaned = cleaned.replace(/\\n/g, "\n");
+  cleaned = cleaned.replace(/\r/g, "");
+
+  const header = "-----BEGIN PRIVATE KEY-----";
+  const footer = "-----END PRIVATE KEY-----";
+
+  if (cleaned.includes(header) && cleaned.includes(footer)) {
+    let body = cleaned
+      .replace(header, "")
+      .replace(footer, "")
+      .trim();
+
+    body = body.replace(/[\s\r\n]+/g, "");
+
+    return `${header}\n${body}\n${footer}`;
+  }
+
+  return cleaned;
+}
+
 function getAdminApp(): App {
   if (getApps().length > 0) return getApps()[0];
 
-  let privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-  if (privateKey) {
-    privateKey = privateKey.trim();
-    if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-      privateKey = privateKey.slice(1, -1).trim();
-    }
-    if (privateKey.startsWith("'") && privateKey.endsWith("'")) {
-      privateKey = privateKey.slice(1, -1).trim();
-    }
-    privateKey = privateKey.replace(/\\n/g, "\n");
-    privateKey = privateKey.replace(/\r/g, "");
-  }
+  const rawKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
+  const privateKey = rawKey ? cleanPrivateKey(rawKey) : undefined;
 
   if (!privateKey || !process.env.FIREBASE_ADMIN_PROJECT_ID) {
     throw new Error(
