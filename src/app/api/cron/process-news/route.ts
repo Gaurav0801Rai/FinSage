@@ -171,7 +171,18 @@ async function createUserAlerts(
     baseImpact: string;
     severity: "high" | "medium" | "low";
     confidence: number;
-  }
+  },
+  newsTitle: string,
+  emailQueue: Array<{
+    uid: string;
+    email: string;
+    emailAlerts: boolean;
+    severityThreshold: string;
+    symbol: string;
+    title: string;
+    severity: string;
+    whyItMatters: string;
+  }>
 ): Promise<number> {
   if (affectedSymbols.length === 0) return 0;
 
@@ -241,43 +252,24 @@ async function createUserAlerts(
 
       alertsCreated++;
 
-      // Trigger Email alert via MCP client if user enabled it and meets severity threshold
+      // Queue email alert details if user enabled it and meets severity threshold
       const settings = userSettings.get(uid);
       if (settings && settings.email && settings.emailAlerts) {
         const alertLevel = SEVERITY_LEVELS[analysis.severity] || 1;
         const userThreshold = SEVERITY_LEVELS[settings.severityThreshold] || 2;
 
         if (alertLevel >= userThreshold) {
-          const emailBody = `Hello,
-
-FinSage has detected a market event that might affect your holdings (${holdings.map((h) => h.symbol).join(", ")}):
-
-Alert Severity: ${analysis.severity.toUpperCase()}
-Impact Analysis:
-${analysis.baseImpact}
-
-You can view more details directly in your FinSage dashboard.
-
-Regards,
-FinSage AI Alerts`;
-
-          // Call the Gmail MCP tool (send message directly) using user's registered email
-          callMcpTool("gmail_send_message", {
-            to: settings.email,
-            subject: `[FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}`,
-            body: emailBody,
-            userId: "me",
-            message: {
-              to: settings.email,
-              subject: `[FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}`,
-              raw: Buffer.from(
-                `To: ${settings.email}\r\n` +
-                `Subject: [FinSage Alert] ${analysis.severity.toUpperCase()} Impact: ${holdings.map((h) => h.symbol).join(", ")}\r\n\r\n` +
-                emailBody
-              ).toString("base64url")
-            }
-          }).catch((err) => {
-            console.error(`[MCP Gmail Alert] Failed to send email for user ${uid} (${settings.email}):`, err);
+          holdings.forEach((h) => {
+            emailQueue.push({
+              uid,
+              email: settings.email,
+              emailAlerts: settings.emailAlerts,
+              severityThreshold: settings.severityThreshold,
+              symbol: h.symbol,
+              title: newsTitle,
+              severity: analysis.severity,
+              whyItMatters: analysis.baseImpact,
+            });
           });
         }
       }
@@ -290,6 +282,41 @@ FinSage AI Alerts`;
     console.error("Error creating user alerts:", err);
     return 0;
   }
+}
+
+async function generateCombinedSummary(
+  symbol: string,
+  alerts: Array<{ title: string; whyItMatters: string }>
+): Promise<string> {
+  if (alerts.length === 1) return alerts[0].whyItMatters;
+
+  const prompt = `You are a financial analyst. Summarize these multiple news events affecting ${symbol} into a single, cohesive 2-sentence summary of what they mean for the investor:
+  
+  ${alerts.map((a, i) => `Event ${i+1}: ${a.title}\nAnalysis: ${a.whyItMatters}`).join("\n\n")}
+  
+  Return only the 2-sentence summary.`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 250,
+        },
+      }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+    }
+  } catch (err) {
+    console.error("Combined summary error:", err);
+  }
+  return alerts.map(a => `- ${a.whyItMatters}`).join("\n");
 }
 
 
@@ -306,6 +333,17 @@ export async function GET(request: Request) {
   try {
     console.log("\n═══ News Processing Cron Started ═══");
     const startTime = Date.now();
+
+    const emailQueue: Array<{
+      uid: string;
+      email: string;
+      emailAlerts: boolean;
+      severityThreshold: string;
+      symbol: string;
+      title: string;
+      severity: string;
+      whyItMatters: string;
+    }> = [];
 
     const unprocessedSnap = await adminDb
       .collection("news")
@@ -366,7 +404,9 @@ export async function GET(request: Request) {
         const newAlerts = await createUserAlerts(
           newsId,
           analysis.affectedSymbols,
-          analysis
+          analysis,
+          (newsData.title as string) ?? "",
+          emailQueue
         );
         alertsCreated += newAlerts;
 
@@ -388,6 +428,74 @@ export async function GET(request: Request) {
           })
           .catch(() => {});
         skipped++;
+      }
+    }
+
+    // Process consolidated email alerts
+    if (emailQueue.length > 0) {
+      const userEmails: Record<string, typeof emailQueue> = {};
+      emailQueue.forEach((item) => {
+        if (!userEmails[item.uid]) userEmails[item.uid] = [];
+        userEmails[item.uid].push(item);
+      });
+
+      for (const [uid, items] of Object.entries(userEmails)) {
+        const email = items[0].email;
+        
+        const symbolGroups: Record<string, Array<{ title: string; whyItMatters: string; severity: string }>> = {};
+        items.forEach((item) => {
+          if (!symbolGroups[item.symbol]) symbolGroups[item.symbol] = [];
+          if (!symbolGroups[item.symbol].some(x => x.title === item.title)) {
+            symbolGroups[item.symbol].push({
+              title: item.title,
+              whyItMatters: item.whyItMatters,
+              severity: item.severity,
+            });
+          }
+        });
+
+        let emailBody = `Hello,\n\nFinSage has detected market events that affect your portfolio holdings:\n\n`;
+
+        for (const [symbol, alerts] of Object.entries(symbolGroups)) {
+          emailBody += `========================================\n`;
+          emailBody += `${symbol.toUpperCase()}\n`;
+          emailBody += `========================================\n`;
+
+          alerts.forEach((alert) => {
+            emailBody += `• Alert: "${alert.title}"\n`;
+            emailBody += `  Impact: ${alert.severity.toUpperCase()}\n`;
+            emailBody += `  Analysis: ${alert.whyItMatters}\n\n`;
+          });
+
+          if (alerts.length > 1) {
+            const combined = await generateCombinedSummary(symbol, alerts);
+            emailBody += `Summary of ${symbol} events:\n${combined}\n\n`;
+          }
+        }
+
+        emailBody += `You can view all your active alerts and details directly in your FinSage dashboard.\n\n`;
+        emailBody += `Regards,\nFinSage AI Alerts`;
+
+        const subjectSymbols = Object.keys(symbolGroups).join(", ");
+        const emailSubject = `[FinSage Alert] Impact Detected: ${subjectSymbols}`;
+
+        callMcpTool("gmail_send_message", {
+          to: email,
+          subject: emailSubject,
+          body: emailBody,
+          userId: "me",
+          message: {
+            to: email,
+            subject: emailSubject,
+            raw: Buffer.from(
+              `To: ${email}\r\n` +
+              `Subject: ${emailSubject}\r\n\r\n` +
+              emailBody
+            ).toString("base64url")
+          }
+        }).catch((err) => {
+          console.error(`[MCP Gmail Alert] Failed to send consolidated email for user ${uid} (${email}):`, err);
+        });
       }
     }
 
