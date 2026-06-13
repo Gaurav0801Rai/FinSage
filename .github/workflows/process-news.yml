@@ -1,0 +1,16 @@
+name: Process News Relevance Analysis
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows triggering manually from GitHub Action tab
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Process News Endpoint
+        run: |
+          curl -X GET "${{ secrets.APP_URL }}/api/cron/process-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -f

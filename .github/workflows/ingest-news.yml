@@ -1,0 +1,16 @@
+name: Ingest News RSS Feeds
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows triggering manually from GitHub Action tab
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Ingest News Endpoint
+        run: |
+          curl -X GET "${{ secrets.APP_URL }}/api/cron/ingest-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -f
