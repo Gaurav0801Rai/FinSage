@@ -151,7 +151,7 @@ export function CategorizedHoldings({
       )}
 
       {/* Action panel */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-2xl glass-card border border-glass-border">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-[12px] glass-card border border-glass-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-accent-500/10 border border-accent-500/20 flex items-center justify-center">
             <Briefcase className="w-5 h-5 text-accent-400" />
@@ -184,7 +184,7 @@ export function CategorizedHoldings({
 
       {/* Empty State */}
       {holdings.length === 0 && (
-        <div className="glass-card rounded-2xl p-16 text-center max-w-lg mx-auto">
+        <div className="glass-card rounded-[12px] p-16 text-center max-w-lg mx-auto">
           <TrendingUp className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-white/90 mb-1">No holdings registered</h2>
           <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto">
@@ -282,7 +282,7 @@ export function CategorizedHoldings({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md glass-card rounded-2xl p-6 border border-glass-border"
+              className="w-full max-w-md glass-card rounded-[12px] p-6 border border-glass-border"
             >
               <div className="flex items-center justify-between mb-5 pb-3 border-b border-glass-border">
                 <h3 className="text-sm font-semibold text-white/90">
@@ -347,7 +347,7 @@ export function CategorizedHoldings({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md glass-card rounded-2xl p-6 border border-glass-border"
+              className="w-full max-w-md glass-card rounded-[12px] p-6 border border-glass-border"
             >
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-glass-border">
                 <h3 className="text-sm font-semibold text-white/90">Delete Position</h3>

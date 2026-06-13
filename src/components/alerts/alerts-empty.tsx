@@ -15,7 +15,7 @@ export function AlertsEmpty() {
       {/* Icon */}
       <div className="relative mb-6">
         <div
-          className="w-16 h-16 rounded-2xl bg-accent-500/10
+          className="w-16 h-16 rounded-[12px] bg-accent-500/10
                       border border-accent-500/20
                       flex items-center justify-center"
         >

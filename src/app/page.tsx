@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles, Shield, Zap, Bell, LineChart, Brain, TrendingUp } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Zap, Bell, LineChart, Brain, TrendingUp, MessageSquare, Mail } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { ROUTES, APP_NAME } from "@/lib/constants";
 
@@ -77,7 +77,7 @@ export default function LandingPage() {
 
         {/* Hero visual — preview mockup */}
         <div className="relative mx-auto max-w-5xl mt-20 animate-fade-in-up [animation-delay:300ms] [animation-fill-mode:backwards]">
-          <div className="relative glass-card p-1.5 ring-glow-amber bg-white/[0.02]">
+          <div className="relative glass-card p-1.5 ring-glow-gold bg-white/[0.02]">
             <DashboardPreview />
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             <FeatureCard
               icon={Brain}
               title="AI relevance filter"
@@ -126,6 +126,16 @@ export default function LandingPage() {
               description="Every alert includes an AI-generated summary explaining the connection to your holdings. No jargon, no fluff."
             />
             <FeatureCard
+              icon={MessageSquare}
+              title="24/7 AI ChatBot"
+              description="Interact directly with your portfolio's dedicated AI agent. Ask about holdings impact, request news summaries, or run market queries anytime, day or night."
+            />
+            <FeatureCard
+              icon={Mail}
+              title="Daily Email Digest"
+              description="Get a clean, personalized morning summary of news and critical alerts affecting your specific holdings delivered straight to your inbox."
+            />
+            <FeatureCard
               icon={Shield}
               title="You stay in control"
               description="We don't trade for you. We don't advise. We monitor, filter, and surface — your decisions stay yours."
@@ -136,7 +146,7 @@ export default function LandingPage() {
 
       {/* CTA section */}
       <section className="relative px-6 py-24">
-        <div className="mx-auto max-w-3xl text-center glass-card p-12 ring-glow-amber">
+        <div className="mx-auto max-w-3xl text-center glass-card p-12 ring-glow-gold">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight mb-4 text-gradient">
             Stop refreshing news. Start being told.
           </h2>
@@ -199,7 +209,7 @@ function DashboardPreview() {
             <div className="w-3 h-3 rounded-full bg-amber-500/80" />
             <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
           </div>
-          <span className="text-xs text-white/40 font-mono hidden sm:inline">portfolio-pulse.app/dashboard</span>
+          <span className="text-xs text-white/40 font-mono hidden sm:inline">finsage.app/dashboard</span>
         </div>
         <div className="flex items-center gap-2.5 text-xs font-medium text-white/50">
           <span className="text-accent-400 text-2xs uppercase tracking-wider font-semibold">Live feed active</span>

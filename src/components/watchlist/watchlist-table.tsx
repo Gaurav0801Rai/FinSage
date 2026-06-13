@@ -64,7 +64,7 @@ function MoveToPortfolioModal({
         animate={{ opacity: 1, scale: 1 }}
         exit={{   opacity: 0, scale: 0.95 }}
         onClick={(e) => e.stopPropagation()}
-        className="glass-card rounded-2xl p-6 w-full max-w-sm
+        className="glass-card rounded-[12px] p-6 w-full max-w-sm
                    border border-glass-border-hover"
       >
         <h3 className="text-base font-semibold mb-1">
@@ -165,7 +165,7 @@ export function WatchlistTable({ items, prices }: WatchlistTableProps) {
 
   if (localItems.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-12 text-center">
+      <div className="glass-card rounded-[12px] p-12 text-center">
         <TrendingUp className="w-10 h-10 text-white/20 mx-auto mb-3" />
         <p className="text-white/50 text-sm mb-1">
           Your watchlist is empty
@@ -193,7 +193,7 @@ export function WatchlistTable({ items, prices }: WatchlistTableProps) {
         )}
       </AnimatePresence>
 
-      <div className="glass-card rounded-2xl overflow-hidden">
+      <div className="glass-card rounded-[12px] overflow-hidden">
         {/* Table header */}
         <div
           className="grid grid-cols-[2fr_1fr_1fr_1fr_auto]

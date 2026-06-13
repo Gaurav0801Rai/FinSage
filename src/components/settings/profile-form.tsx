@@ -33,7 +33,7 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
   };
 
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="glass-card rounded-[12px] p-6">
       <div className="flex items-center gap-3 mb-5">
         <div className="w-9 h-9 rounded-xl bg-accent-500/10
                         border border-accent-500/20

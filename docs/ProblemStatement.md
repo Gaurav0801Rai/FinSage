@@ -2,7 +2,7 @@
 
 ## Project Title
 
-**Portfolio Pulse** - AI-Powered Portfolio Intelligence Platform
+**FinSage** - AI-Powered Portfolio Intelligence Platform
 
 ---
 
@@ -14,7 +14,7 @@ This fragmentation results in a high-volume stream of noise. A retail investor i
 
 For an individual, it is practically impossible to manually filter this massive influx of news to extract only what is relevant to their specific holdings. A general market index headline might have zero correlation to their portfolio, while an obscure trade announcement could have a massive impact. 
 
-The core challenge Portfolio Pulse addresses is:
+The core challenge FinSage addresses is:
 
 > How can modern retail investors stay informed about only the news, market events, and social signals that directly impact their personal portfolio, without being overwhelmed by generic financial noise, and how can they achieve this cost-effectively and securely?
 
@@ -22,7 +22,7 @@ The core challenge Portfolio Pulse addresses is:
 
 ## Target Users
 
-Portfolio Pulse is designed for individual retail investors who:
+FinSage is designed for individual retail investors who:
 
 1. **Invest in the Indian Stock Market**: Active participants holding equities on the National Stock Exchange (NSE) or Bombay Stock Exchange (BSE).
 2. **Hold Cryptocurrencies**: Track digital assets (e.g., Bitcoin, Ethereum) alongside traditional market holdings in a single unified view.
@@ -50,7 +50,7 @@ Building a personal, production-grade intelligence platform introduces several d
 
 ### 3. Data Integrity & Trust (Always Confirm OCR)
 *   **The Challenge**: AI-extracted data from portfolio screenshots can occasionally suffer from minor OCR hallucinations (e.g., misreading a quantity or ticket symbol due to dark mode colors or column formatting).
-*   **The Constraint**: Auto-committing parsed data directly to the user's portfolio leads to database corruption and untrusted metrics.
+*   **The Constraint**: Auto-committing parsed data directly to the user's portfolio leads to database corruption and trusted metrics.
 *   **The Design Solution**: Extracted holdings must always be presented to the user on an editable review and correction screen before being written to Firestore. A manual fallback form must also be available.
 
 ### 4. Database Lifecycle Rules (Soft Deletes)
@@ -61,7 +61,7 @@ Building a personal, production-grade intelligence platform introduces several d
 
 ## Proposed Solution & Core Modules
 
-Portfolio Pulse functions as a premium, gold/amber dark-themed, glassmorphic portfolio intelligence layer. It is organized into the following key modules:
+FinSage functions as a premium, gold/blue dark-themed, workspace panel surface portfolio intelligence layer. It is organized into the following key modules:
 
 ```mermaid
 graph TD
@@ -72,7 +72,9 @@ graph TD
     E -->|Yes| G[Stage 2: Gemini Relevance Analysis]
     G -->|Analyze Impact & Severity| H[(Base News Analyses)]
     C & H -->|Generate Alerts| I[Alerts Engine]
-    I -->|User-specific Alerts| J[Amber/Gold Glassmorphic Dashboard]
+    I -->|User-specific Alerts| J[Gold/Blue Premium Dashboard]
+    J -->|Chat Context| K[24/7 AI Chatbot Assistant]
+    I -->|Curated Alerts| L[Daily Email Digest]
 ```
 
 ### 1. Auth & Session Management
@@ -88,15 +90,20 @@ A secure, cookie-based session pattern (`pp_session` httpOnly cookie) split betw
 *   A user-specific alerts system classifying impact severity (`high`, `medium`, `low`), specifying affected tickers, and providing short "Why it matters" AI summaries.
 *   A global `SidebarWrapper` supplying the unread counts to the client-side sidebar layout dynamically, avoiding client-side state mismatches.
 
-### 4. Settings & Personalization
+### 4. Interactive 24/7 AI Chatbot Assistant
+*   A contextual chatbot interface allowing users to query their portfolio performance, news impacts, and market happenings directly.
+*   Features a custom-designed Golden Robot mascot with a floating drawer chat experience accessible from any dashboard page.
+
+### 5. Personalization & Email Notifications
 *   User preference management allowing toggle of primary display currency (`INR` or `USD`), alert severity thresholds (`high`, `medium`, `low`), and communication alerts.
+*   Daily Email Digest (Phase 6) sending a morning summary of critical alerts and news directly to the user's registered inbox.
 *   A "Danger Zone" requiring explicit "DELETE" confirmation to wipe out portfolio data.
 
 ---
 
 ## Scope and Boundaries (Crucial Rules)
 
-Portfolio Pulse strictly maintains its positioning as an information and intelligence layer:
+FinSage strictly maintains its positioning as an information and intelligence layer:
 
 *   **NOT a Trading Platform**: Users cannot execute buy or sell orders inside the application. No broker APIs (e.g., Zerodha Kite, Groww, Binance) are integrated.
 *   **NOT Financial Advice**: The AI-generated summaries explain *how* and *why* news affects holdings (e.g., "RBI raising repo rates increases borrowing costs for your holding HDFC Bank"). It never provides trading suggestions (e.g., "Buy," "Sell," or "Hold").
@@ -107,6 +114,6 @@ Portfolio Pulse strictly maintains its positioning as an information and intelli
 
 ## Why This Problem Matters
 
-Retail investors do not lack news; they lack time and context. The financial markets operate in a state of constant information overload. By translating global, macro, and micro developments into immediate, portfolio-specific impact statements, Portfolio Pulse moves the investor from a reactive state (searching for what happened after a price move) to a proactive state (understanding the event as it breaks). 
+Retail investors do not lack news; they lack time and context. The financial markets operate in a state of constant information overload. By translating global, macro, and micro developments into immediate, portfolio-specific impact statements, FinSage moves the investor from a reactive state (searching for what happened after a price move) to a proactive state (understanding the event as it breaks). 
 
 Tailoring the experience to the Indian market via support for NSE/BSE equities, `en-IN` Lakhs/Crores number formatting, INR primary currency display, and a sleek modern dark design elevates the application into a premium utility that delivers real value daily.

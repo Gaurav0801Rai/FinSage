@@ -1,6 +1,6 @@
-# Portfolio Pulse — Technical Architecture & Operations Guide
+# FinSage — Technical Architecture & Operations Guide
 
-This document is the comprehensive guide to the architecture, Firestore database structures, operational workflows, and security rules for **Portfolio Pulse**.
+This document is the comprehensive guide to the architecture, Firestore database structures, operational workflows, and security rules for **FinSage**.
 
 ---
 
@@ -19,9 +19,11 @@ Ensure the following variables are defined in your `.env.local` file for develop
 | `FIREBASE_ADMIN_PROJECT_ID` | Server Only | Firestore Admin SDK Credentials |
 | `FIREBASE_ADMIN_CLIENT_EMAIL` | Server Only | Firestore Admin SDK service account email |
 | `FIREBASE_ADMIN_PRIVATE_KEY` | Server Only | Firestore Admin SDK private key |
-| `GEMINI_API_KEY` | Server Only | Google Gemini AI & Vision endpoints access |
+| `GEMINI_API_KEY` | Server Only | Google Gemini AI & Vision endpoints access (used as fallback for chatbot) |
+| `GROQ_API_KEY` | Server Only | Primary API key for chatbot completions (Groq API) |
+| `GROQ_MODEL` | Server Only | Optional. Model ID for chatbot on Groq (defaults to `llama-3.3-70b-versatile`) |
 | `NEWS_API_KEY` | Server Only | Target keyword queries for news ingestion pipeline |
-| `REDDIT_CLIENT_ID` | Server Only | Reddit API ingestion access (Phase 8 Polish) |
+| `REDDIT_CLIENT_ID` | Server Only | Reddit API ingestion access (Phase 4) |
 | `REDDIT_CLIENT_SECRET` | Server Only | Reddit API ingestion secret key |
 | `CRON_SECRET` | Server Only | Authentication token for Vercel Cron routes |
 | `NEXT_PUBLIC_APP_URL` | Client & Server | Root URL of the deployed app for auth redirects |
@@ -96,6 +98,17 @@ All documents leverage automatic ID generation unless noted. Timestamps are writ
       createdAt: Timestamp;
       readAt: Timestamp | null;
       dismissed: boolean;
+    }
+    ```
+
+### `users/{uid}/chats/{messageId}` (Subcollection)
+*   **Purpose**: Stores RAG chatbot message history for the user (rolling limit of 25 messages is enforced).
+*   **Schema**:
+    ```typescript
+    interface ChatMessageDoc {
+      role: "user" | "model";
+      text: string;
+      createdAt: Timestamp; // Server timestamp on write, mapped to ms timestamp on read
     }
     ```
 

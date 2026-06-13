@@ -27,13 +27,13 @@ const config: Config = {
           100: "#FDF5D2",
           200: "#FBECA5",
           300: "#F8DF78",
-          400: "#D4AF37", // secondary gold
-          500: "#E2B659", // main accent
-          600: "#C59B3F",
-          700: "#A6802C",
-          800: "#87661E",
-          900: "#684E11",
-          glow: "rgba(226, 182, 89, 0.4)",
+          400: "#FFD700", // secondary bright gold
+          500: "#FFC837", // main vibrant gold
+          600: "#E5B22F",
+          700: "#C1931E",
+          800: "#9E7615",
+          900: "#7A590D",
+          glow: "rgba(255, 200, 55, 0.45)",
         },
 
         // Trust Blue accent
@@ -62,7 +62,7 @@ const config: Config = {
         // Alert severity colors
         severity: {
           high: "#F43F5E",
-          medium: "#E2B659",
+          medium: "#FFC837",
           low: "#3B82F6",
         },
       },

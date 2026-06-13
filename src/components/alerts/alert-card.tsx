@@ -111,7 +111,7 @@ export function AlertCard({ alert }: AlertCardProps) {
       transition={{ duration: 0.3 }}
       onClick={handleMarkRead}
       className={cn(
-        "glass-card rounded-2xl overflow-hidden cursor-pointer",
+        "glass-card rounded-[12px] overflow-hidden cursor-pointer",
         "border transition-all duration-300",
         isUnread
           ? `${config.border} ring-1 ring-inset ${config.border}`
@@ -186,7 +186,7 @@ export function AlertCard({ alert }: AlertCardProps) {
         {/* AI explanation */}
         <div
           className={cn(
-            "p-3 rounded-xl mb-3 border",
+            "p-3 rounded-[12px] mb-3 border",
             "bg-accent-500/[0.02] border-accent-500/15"
           )}
         >

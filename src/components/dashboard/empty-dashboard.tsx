@@ -16,12 +16,12 @@ export function EmptyDashboard() {
     >
       {/* Icon */}
       <div className="relative mb-8">
-        <div className="w-20 h-20 rounded-2xl bg-accent-500/10
+        <div className="w-20 h-20 rounded-[12px] bg-accent-500/10
                         border border-accent-500/20
                         flex items-center justify-center">
           <TrendingUp className="w-9 h-9 text-accent-400" />
         </div>
-        <div className="absolute -inset-2 rounded-3xl border
+        <div className="absolute -inset-2 rounded-[12px] border
                         border-accent-500/10 animate-pulse" />
       </div>
 

@@ -23,7 +23,7 @@ export default function DashboardError({
         animate={{ opacity: 1, y: 0 }}
         className="text-center max-w-sm"
       >
-        <div className="w-14 h-14 rounded-2xl bg-loss/10
+        <div className="w-14 h-14 rounded-[12px] bg-loss/10
                         border border-loss/20
                         flex items-center justify-center mx-auto mb-5">
           <AlertTriangle className="w-6 h-6 text-loss" />

@@ -135,7 +135,7 @@ export function UploadDropzone({ onImageSelected }: UploadDropzoneProps) {
             onDrop={handleDrop}
             className={cn(
               "relative flex flex-col items-center justify-center",
-              "w-full min-h-[320px] rounded-2xl cursor-pointer",
+              "w-full min-h-[320px] rounded-[12px] cursor-pointer",
               "border-2 border-dashed transition-all duration-300",
               "glass-card",
               isDragOver
@@ -150,7 +150,7 @@ export function UploadDropzone({ onImageSelected }: UploadDropzoneProps) {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 rounded-2xl pointer-events-none"
+                  className="absolute inset-0 rounded-[12px] pointer-events-none"
                   style={{
                     boxShadow: "inset 0 0 60px rgba(251, 191, 36, 0.08)",
                   }}
@@ -161,7 +161,7 @@ export function UploadDropzone({ onImageSelected }: UploadDropzoneProps) {
             {/* Icon */}
             <div
               className={cn(
-                "w-16 h-16 rounded-2xl flex items-center justify-center mb-5",
+                "w-16 h-16 rounded-[12px] flex items-center justify-center mb-5",
                 "border transition-colors duration-300",
                 isDragOver
                   ? "bg-accent-500/20 border-accent-500/40"
@@ -214,7 +214,7 @@ export function UploadDropzone({ onImageSelected }: UploadDropzoneProps) {
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.97 }}
-            className="relative w-full rounded-2xl overflow-hidden glass-card"
+            className="relative w-full rounded-[12px] overflow-hidden glass-card"
           >
             {/* Preview image */}
             <div className="relative w-full max-h-[400px] overflow-hidden">

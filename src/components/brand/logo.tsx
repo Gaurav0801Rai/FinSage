@@ -26,30 +26,45 @@ export function Logo({ className, showText = true, size = "md" }: LogoProps) {
           xmlns="http://www.w3.org/2000/svg"
           className="relative z-10"
         >
-          {/* Modern geometric F shape for FinSage */}
+          {/* Modern abstract swoosh F logo matching the reference image */}
           <path
-            d="M8 6h16v4H12v6h10v4H12v8H8V6z"
-            fill="url(#logo-gradient)"
+            d="M7 6C15 6 22 7 26 10C21 12 16 14 12 18C12 13 10 9 7 6Z"
+            fill="url(#logo-gold-grad)"
+          />
+          <path
+            d="M8 15C13 16 18 18 21 21C17 22 14 25 12 29C12 24 11 20 8 15Z"
+            fill="url(#logo-blue-grad)"
           />
           <defs>
             <linearGradient
-              id="logo-gradient"
-              x1="8"
+              id="logo-gold-grad"
+              x1="7"
               y1="6"
-              x2="24"
-              y2="28"
+              x2="26"
+              y2="18"
               gradientUnits="userSpaceOnUse"
             >
-              <stop stopColor="#E2B659" />
-              <stop offset="1" stopColor="#D4AF37" />
+              <stop stopColor="#FFC837" />
+              <stop offset="1" stopColor="#FFD700" />
+            </linearGradient>
+            <linearGradient
+              id="logo-blue-grad"
+              x1="8"
+              y1="15"
+              x2="21"
+              y2="29"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#00E5FF" />
+              <stop offset="1" stopColor="#1F4E79" />
             </linearGradient>
           </defs>
         </svg>
         {/* Glow */}
-        <div className="absolute inset-0 blur-md opacity-30 bg-[#E2B659]/30 rounded-full" />
+        <div className="absolute inset-0 blur-md opacity-30 bg-[#FFC837]/30 rounded-full" />
       </div>
       {showText && (
-        <span className={cn("font-bold uppercase tracking-[1.2px] text-[#E2B659] font-sans", text)}>
+        <span className={cn("font-bold uppercase tracking-[1.2px] text-[#FFC837] font-sans", text)}>
           FINSAGE
         </span>
       )}

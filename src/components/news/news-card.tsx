@@ -58,7 +58,7 @@ export function NewsCard({ item, userSymbols }: NewsCardProps) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="glass-card glass-card-hover rounded-2xl p-5 group"
+      className="glass-card glass-card-hover rounded-[12px] p-5 group"
     >
       <div className="flex gap-4">
         <div className="flex-1 min-w-0">

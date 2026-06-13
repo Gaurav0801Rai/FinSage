@@ -65,7 +65,7 @@ export function AddToWatchlistForm({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-2xl p-5"
+      className="glass-card rounded-[12px] p-5"
     >
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-sm font-semibold text-white/90">

@@ -95,7 +95,7 @@ export function HoldingsTable({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      className="glass-card rounded-2xl overflow-hidden"
+      className="glass-card rounded-[12px] overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4

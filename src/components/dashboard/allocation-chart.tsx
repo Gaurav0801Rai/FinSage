@@ -15,24 +15,24 @@ interface AllocationChartProps {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  stock:       "Stocks",
-  crypto:      "Crypto",
+  stock: "Stocks",
+  crypto: "Crypto",
   mutual_fund: "Mutual Funds",
-  etf:         "ETFs",
+  etf: "ETFs",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  stock:       "#FBBF24", // amber
-  crypto:      "#10B981", // emerald
+  stock: "#FFC837", // gold
+  crypto: "#10B981", // emerald
   mutual_fund: "#3B82F6", // blue
-  etf:         "#8B5CF6", // purple
+  etf: "#8B5CF6", // purple
 };
 
 const TYPE_BG: Record<string, string> = {
-  stock:       "bg-accent-500/20",
-  crypto:      "bg-gain/20",
+  stock: "bg-accent-500/20",
+  crypto: "bg-gain/20",
   mutual_fund: "bg-blue-500/20",
-  etf:         "bg-purple-500/20",
+  etf: "bg-purple-500/20",
 };
 
 // Custom tooltip
@@ -62,7 +62,7 @@ export function AllocationChart({ allocationByType }: AllocationChartProps) {
   const data = Object.entries(allocationByType)
     .filter(([, value]) => value > 0)
     .map(([type, value]) => ({
-      name:  TYPE_LABELS[type] ?? type,
+      name: TYPE_LABELS[type] ?? type,
       value: parseFloat(value.toFixed(1)),
       type,
       color: TYPE_COLORS[type] ?? "#94A3B8",
@@ -71,7 +71,7 @@ export function AllocationChart({ allocationByType }: AllocationChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-6 flex items-center
+      <div className="glass-card rounded-[12px] p-6 flex items-center
                       justify-center h-[280px]">
         <p className="text-white/30 text-sm">No allocation data</p>
       </div>
@@ -83,7 +83,7 @@ export function AllocationChart({ allocationByType }: AllocationChartProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="glass-card rounded-2xl p-6"
+      className="glass-card rounded-[12px] p-6"
     >
       <h3 className="text-sm font-semibold text-white/80 mb-5">
         Asset Allocation

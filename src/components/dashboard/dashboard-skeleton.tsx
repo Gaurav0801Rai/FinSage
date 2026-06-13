@@ -8,23 +8,23 @@ export function DashboardSkeleton() {
       </div>
 
       {/* Hero */}
-      <div className="skeleton h-[180px] rounded-2xl" />
+      <div className="skeleton h-[180px] rounded-[12px]" />
 
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="skeleton h-[110px] rounded-2xl" />
+          <div key={i} className="skeleton h-[110px] rounded-[12px]" />
         ))}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="skeleton h-[280px] rounded-2xl" />
-        <div className="skeleton h-[280px] rounded-2xl" />
+        <div className="skeleton h-[280px] rounded-[12px]" />
+        <div className="skeleton h-[280px] rounded-[12px]" />
       </div>
 
       {/* Table */}
-      <div className="skeleton h-[360px] rounded-2xl" />
+      <div className="skeleton h-[360px] rounded-[12px]" />
     </div>
   );
 }

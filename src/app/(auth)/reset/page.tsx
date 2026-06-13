@@ -39,11 +39,11 @@ export default function ResetPasswordPage() {
         </Link>
       </div>
 
-      <div className="glass-card ring-glow-amber p-8">
+      <div className="glass-card ring-glow-gold p-8">
         {state === "sent" ? (
           /* Success state */
           <div className="text-center py-4">
-            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gain/10 border border-gain/20 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-[12px] bg-gain/10 border border-gain/20 flex items-center justify-center">
               <CheckCircle2 className="w-7 h-7 text-gain" />
             </div>
             <h1 className="text-xl font-semibold mb-2">Check your email</h1>

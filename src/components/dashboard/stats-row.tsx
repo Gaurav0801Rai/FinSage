@@ -102,7 +102,7 @@ export function StatsRow({
         <motion.div
           key={stat.label}
           variants={cardVariants}
-          className="glass-card glass-card-hover rounded-2xl p-5"
+          className="glass-card glass-card-hover rounded-[12px] p-5"
         >
           {/* Icon */}
           <div className={cn(

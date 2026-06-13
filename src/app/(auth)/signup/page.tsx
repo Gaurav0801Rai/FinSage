@@ -78,7 +78,7 @@ export default function SignupPage() {
         </Link>
       </div>
 
-      <div className="glass-card ring-glow-amber p-8">
+      <div className="glass-card ring-glow-gold p-8">
         <div className="mb-6">
           <h1 className="text-xl font-semibold mb-1">Create your account</h1>
           <p className="text-sm text-white/50">

@@ -25,7 +25,7 @@ export function HoldingsReviewTable({
 
   if (holdings.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-12 text-center">
+      <div className="glass-card rounded-[12px] p-12 text-center">
         <TrendingUp className="w-10 h-10 text-white/20 mx-auto mb-3" />
         <p className="text-white/50 text-sm">
           No holdings yet. Add one using the button below.
@@ -35,7 +35,7 @@ export function HoldingsReviewTable({
   }
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-[12px] overflow-hidden">
       {/* Table header */}
       <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr_auto]
                       gap-3 px-4 py-3 border-b border-glass-border
@@ -64,7 +64,7 @@ export function HoldingsReviewTable({
                 "gap-3 px-4 py-4 items-center",
                 "border-b border-glass-border last:border-b-0",
                 "hover:bg-white/[0.02] transition-colors",
-                hasWarning(holding) && "bg-amber-500/[0.03]"
+                hasWarning(holding) && "bg-[#E2B659]/[0.03]"
               )}
             >
               {/* Col 1 — Symbol and Name */}

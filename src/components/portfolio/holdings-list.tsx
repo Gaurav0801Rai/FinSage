@@ -29,7 +29,7 @@ const rowVariants = {
 export function HoldingsList({ holdings, prices = {} }: HoldingsListProps) {
   if (holdings.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-12 text-center">
+      <div className="glass-card rounded-[12px] p-12 text-center">
         <TrendingUp className="w-10 h-10 text-white/20 mx-auto mb-3" />
         <p className="text-white/50 text-sm mb-1">No holdings yet</p>
         <p className="text-white/30 text-xs">
@@ -44,7 +44,7 @@ export function HoldingsList({ holdings, prices = {} }: HoldingsListProps) {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="glass-card rounded-2xl overflow-hidden"
+      className="glass-card rounded-[12px] overflow-hidden"
     >
       {/* Header */}
       <div

@@ -89,7 +89,7 @@ export function PortfolioChart({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.25 }}
-      className="glass-card rounded-2xl p-6"
+      className="glass-card rounded-[12px] p-6"
     >
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-sm font-semibold text-white/80">

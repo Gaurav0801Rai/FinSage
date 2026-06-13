@@ -411,12 +411,23 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
 - Move to portfolio modal: enter quantity and avg buy price ✓
 - Empty state with helpful CTA ✓
 
-### Phase 8 — Polish 🔄 NEXT UP
-- Loading shimmer skeletons
-- Empty states with personality
-- Error boundaries
-- Mobile responsiveness pass
-- Performance optimization
+### Phase 8 — Polish & Rebrand ✅ COMPLETE
+- Rebrand the platform from "Portfolio Pulse" to "FinSage" ✓
+- Styling overhaul with vibrant dual-accent gold (`#E2B659`) / trust blue (`#1F4E79`) and premium dark workspace panel surfaces (`#121820`, `rounded-[12px]`) ✓
+- Enhanced sidebar layout with gold glow border shadows for active state ✓
+- Updated key metrics inside tables to `font-semibold` for scan speed ✓
+- Fixed trailing issues: linked the topbar bell icon, set up collectionGroup indexes, and updated RSS filters ✓
+
+### Phase 9 — 24/7 AI Chatbot Assistant ✅ COMPLETE
+- Created a contextual floating chatbot interface with a customizable mascot ✓
+- Implemented RAG (Retrieval-Augmented Generation) context: reads user's holdings, current performance, and recent news/alerts ✓
+- Configured the Groq API handler (supporting Llama-3.3-70b-versatile) with automatic fallback to Gemini 2.5 Flash ✓
+- Enforced a rolling limit of 25 messages stored in Firestore subcollection `users/{uid}/chats` ✓
+
+### Phase 10 — Daily Email Digest & Alerts ✅ COMPLETE
+- Created settings toggle to activate/deactivate daily digests and email alerts ✓
+- Integrated email delivery pipeline directly triggered during news processing cron run ✓
+- Utilized Gmail MCP tool (`gmail_send_message`) to send automated, formatted alert emails if the severity threshold matches the user's preferences ✓
 
 ---
 
@@ -442,6 +453,7 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
   forcing v1beta which had broken quota. Direct fetch uses /v1/ explicitly.
 - Firebase Storage confirmed not needed — base64 inline to Gemini works perfectly.
 - OCR prompt uses explicit JSON schema with Indian lakh format instruction.
+
 ### Phase 3
 - Price service uses direct Yahoo Finance query2 API (no auth needed)
 - CoinGecko simple price API for crypto (batch fetches all crypto in one call)
@@ -465,6 +477,7 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
 - Solution: SidebarWrapper (server) fetches count and passes as prop to Sidebar (client)
 - This is the correct Next.js App Router pattern for this situation
 - Watchlist page is a placeholder until Phase 7
+
 ### Phase 6
 - Settings page uses getUserPreferences Server Action to read Firestore on load
 - Currency preference changes display format only — no live exchange rate conversion yet
@@ -492,3 +505,13 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
 - Sidebar update: Updated navigation background to Deep Navy-Black (`#0E131A`), styled the active item with gold glow border shadows, and set inactive elements to `text-slate-500` (`#64748B`).
 - Emphasized key numeric metrics inside holdings lists by updating table field weights to `font-semibold` for rapid visual scanning.
 - Restyled alert boxes and system explanation indicators with dedicated gold frames and category badges.
+
+### Phase 9 (24/7 AI Chatbot Assistant)
+- Chatbot uses Groq API with Llama-3.3-70b-versatile for high quality, fast financial reasoning.
+- Fallback path built to use Gemini 2.5 Flash API directly if GROQ_API_KEY is not defined, ensuring service resilience.
+- Database footprint restricted by saving only the last 25 chat messages per user (rolling limit) to Firestore. Older logs are deleted via batch execution.
+- To prevent hallucinated conversions, the current USD to INR exchange rate is fetched in real-time and passed to the chatbot context.
+
+### Phase 10 (Daily Email Digest & Alerts)
+- Leveraged custom Gmail MCP service (`gmail_send_message` via standard MCP client) to handle transaction/alert emails rather than setting up separate SMTP or third-party paid providers.
+- Email triggers are integrated directly into the `process-news` cron pipeline, checking user preference filters (severity threshold and alert toggles) before firing a dispatch.

@@ -73,7 +73,7 @@ export function PortfolioHero({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="glass-card rounded-2xl p-6 md:p-8 ring-glow-amber"
+      className="glass-card rounded-[12px] p-6 md:p-8 ring-glow-gold"
     >
       <div className="flex flex-col md:flex-row md:items-end
                       md:justify-between gap-6">

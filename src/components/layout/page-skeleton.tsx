@@ -5,17 +5,17 @@ export function PageSkeleton() {
         <div className="skeleton h-7 w-40 rounded-lg" />
         <div className="skeleton h-4 w-56 rounded-md" />
       </div>
-      <div className="skeleton h-[180px] rounded-2xl" />
+      <div className="skeleton h-[180px] rounded-[12px]" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="skeleton h-[110px] rounded-2xl" />
+          <div key={i} className="skeleton h-[110px] rounded-[12px]" />
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="skeleton h-[280px] rounded-2xl" />
-        <div className="skeleton h-[280px] rounded-2xl" />
+        <div className="skeleton h-[280px] rounded-[12px]" />
+        <div className="skeleton h-[280px] rounded-[12px]" />
       </div>
-      <div className="skeleton h-[360px] rounded-2xl" />
+      <div className="skeleton h-[360px] rounded-[12px]" />
     </div>
   );
 }
@@ -24,7 +24,7 @@ export function CardSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {[...Array(count)].map((_, i) => (
-        <div key={i} className="skeleton h-24 rounded-2xl" />
+        <div key={i} className="skeleton h-24 rounded-[12px]" />
       ))}
     </div>
   );
@@ -32,7 +32,7 @@ export function CardSkeleton({ count = 3 }: { count?: number }) {
 
 export function TableSkeleton() {
   return (
-    <div className="glass-card rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-[12px] overflow-hidden">
       <div className="skeleton h-12 rounded-none border-b border-glass-border" />
       {[...Array(5)].map((_, i) => (
         <div

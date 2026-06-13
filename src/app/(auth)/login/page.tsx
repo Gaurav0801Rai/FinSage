@@ -78,7 +78,7 @@ function LoginForm() {
         </Link>
       </div>
 
-      <div className="glass-card ring-glow-amber p-8">
+      <div className="glass-card ring-glow-gold p-8">
         <div className="mb-6">
           <h1 className="text-xl font-semibold mb-1">Welcome back</h1>
           <p className="text-sm text-white/50">
@@ -195,7 +195,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="w-full max-w-md glass-card ring-glow-amber p-8 text-center text-white/50 text-sm">
+      <div className="w-full max-w-md glass-card ring-glow-gold p-8 text-center text-white/50 text-sm">
         Loading sign in interface...
       </div>
     }>
