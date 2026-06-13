@@ -222,6 +222,46 @@ export async function runNewsIngestion(): Promise<IngestionResult> {
       `${result.errors} errors`
     );
 
+    // ── Step 6: Prune news older than 14 days to keep storage size permanently small ──
+    try {
+      const pruneCutoff = new Date();
+      pruneCutoff.setDate(pruneCutoff.getDate() - 14);
+      
+      const oldNewsSnap = await adminDb
+        .collection("news")
+        .where("publishedAt", "<", Timestamp.fromDate(pruneCutoff))
+        .get();
+
+      if (!oldNewsSnap.empty) {
+        console.log(`Pruning ${oldNewsSnap.size} news documents older than 14 days...`);
+        const deleteBatches = [];
+        let currentBatch = adminDb.batch();
+        let ops = 0;
+
+        for (const doc of oldNewsSnap.docs) {
+          currentBatch.delete(doc.ref);
+          currentBatch.delete(adminDb.collection("news_analyses").doc(doc.id));
+          ops += 2;
+
+          if (ops >= 400) {
+            deleteBatches.push(currentBatch);
+            currentBatch = adminDb.batch();
+            ops = 0;
+          }
+        }
+        if (ops > 0) {
+          deleteBatches.push(currentBatch);
+        }
+
+        for (const dbBatch of deleteBatches) {
+          await dbBatch.commit();
+        }
+        console.log("News pruning complete!");
+      }
+    } catch (pruneErr) {
+      console.error("Error during news pruning:", pruneErr);
+    }
+
     return result;
   } catch (err) {
     console.error("Ingestion error:", err);
