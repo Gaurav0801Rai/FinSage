@@ -5,6 +5,7 @@ import { getAuthenticatedUser } from "@/lib/firebase/session";
 import { fetchPrices } from "@/lib/price-service";
 import { getUSDToINR } from "@/lib/exchange-rate";
 import { FieldValue } from "firebase-admin/firestore";
+import { callGroq } from "@/lib/groq";
 
 
 
@@ -149,12 +150,11 @@ ${newsContext}
 Maintain this context in your replies. Use the conversation history to provide coherent answers.`;
 
     // 6. Call AI API
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
 
-    if (GROQ_API_KEY) {
-      console.log("[Chatbot] Routing request to Groq API...");
+    if (hasGroqKeys) {
+      console.log("[Chatbot] Routing request to Groq API with rotation support...");
       const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-      const url = "https://api.groq.com/openai/v1/chat/completions";
 
       // Map conversation history to OpenAI-compatible messages format
       const messages = [
@@ -166,34 +166,24 @@ Maintain this context in your replies. Use the conversation history to provide c
         { role: "user", content: userMessage },
       ];
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
+      try {
+        const data = await callGroq({
           model: GROQ_MODEL,
           messages,
           temperature: 0.2,
-        }),
-        next: { revalidate: 0 },
-      });
+        });
 
-      if (!response.ok) {
-        const errBody = await response.text();
-        console.error("[Chatbot] Groq API error:", errBody);
-        return { success: false, error: "Failed to generate AI response via Groq. Status: " + response.status };
+        const reply = data?.choices?.[0]?.message?.content;
+
+        if (!reply) {
+          return { success: false, error: "Received empty reply from Groq." };
+        }
+
+        return { success: true, response: reply };
+      } catch (err: any) {
+        console.error("[Chatbot] Groq rotation API failed:", err);
+        return { success: false, error: "Failed to generate AI response via Groq: " + err.message };
       }
-
-      const data = await response.json();
-      const reply = data?.choices?.[0]?.message?.content;
-
-      if (!reply) {
-        return { success: false, error: "Received empty reply from Groq." };
-      }
-
-      return { success: true, response: reply };
     } else {
       console.log("[Chatbot] GROQ_API_KEY not found. Falling back to Gemini API...");
       

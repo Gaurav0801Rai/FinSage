@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { Timestamp } from "firebase-admin/firestore";
 import { callMcpTool } from "@/lib/mcp-client";
+import { callGroq } from "@/lib/groq";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
 const GEMINI_MODEL = "gemini-2.5-flash";
@@ -43,39 +44,29 @@ async function generateCombinedSummary(
   }
 
   // Try Groq fallback
-  if (process.env.GROQ_API_KEY) {
+  const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
+  if (hasGroqKeys) {
     try {
       console.log("Attempting fallback to Groq for combined summary...");
-      const url = "https://api.groq.com/openai/v1/chat/completions";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "system",
-              content: "You are a professional financial analyst. Return only the 2-sentence summary requested.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.2,
-        }),
+      const data = await callGroq({
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional financial analyst. Return only the 2-sentence summary requested.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.2,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.choices?.[0]?.message?.content?.trim();
-        if (text) {
-          console.log("Groq combined summary fallback successful!");
-          return text;
-        }
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (text) {
+        console.log("Groq combined summary fallback successful!");
+        return text;
       }
     } catch (err) {
       console.error("Combined summary Groq fallback error:", err);

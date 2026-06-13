@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { callMcpTool } from "@/lib/mcp-client";
+import { callGroq } from "@/lib/groq";
 
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
@@ -109,42 +110,29 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
   let tokensUsed = geminiResult?.tokens ?? 0;
 
   // Fallback to Groq if Gemini failed/exhausted quota
-  if (!rawText && process.env.GROQ_API_KEY) {
+  const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
+  if (!rawText && hasGroqKeys) {
     console.log("Attempting fallback to Groq API for news analysis...");
     try {
-      const url = "https://api.groq.com/openai/v1/chat/completions";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "system",
-              content: "You are a professional financial analyst. You must return ONLY raw valid JSON matching the schema requested. No markdown formatting, no explanation.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.1,
-          response_format: { type: "json_object" },
-        }),
+      const data = await callGroq({
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional financial analyst. You must return ONLY raw valid JSON matching the schema requested. No markdown formatting, no explanation.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.1,
+        response_format: { type: "json_object" },
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        rawText = data?.choices?.[0]?.message?.content ?? "";
-        tokensUsed = data?.usage?.total_tokens ?? 0;
-        console.log("Groq fallback successful!");
-      } else {
-        const errText = await res.text();
-        console.warn("Groq fallback failed:", res.status, errText.slice(0, 300));
-      }
+      rawText = data?.choices?.[0]?.message?.content ?? "";
+      tokensUsed = data?.usage?.total_tokens ?? 0;
+      console.log("Groq fallback successful!");
     } catch (err) {
       console.error("Groq fallback error:", err);
     }
@@ -375,39 +363,29 @@ async function generateCombinedSummary(
   }
 
   // Try Groq fallback
-  if (process.env.GROQ_API_KEY) {
+  const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
+  if (hasGroqKeys) {
     try {
       console.log("Attempting fallback to Groq for combined summary...");
-      const url = "https://api.groq.com/openai/v1/chat/completions";
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
-          messages: [
-            {
-              role: "system",
-              content: "You are a professional financial analyst. Return only the 2-sentence summary requested.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.2,
-        }),
+      const data = await callGroq({
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional financial analyst. Return only the 2-sentence summary requested.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.2,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const text = data?.choices?.[0]?.message?.content?.trim();
-        if (text) {
-          console.log("Groq combined summary fallback successful!");
-          return text;
-        }
+      const text = data?.choices?.[0]?.message?.content?.trim();
+      if (text) {
+        console.log("Groq combined summary fallback successful!");
+        return text;
       }
     } catch (err) {
       console.error("Combined summary Groq fallback error:", err);
