@@ -168,7 +168,10 @@ Never hardcode route strings. Always use the `ROUTES` object from
 | `FIREBASE_ADMIN_PROJECT_ID` | Admin SDK | Server only |
 | `FIREBASE_ADMIN_CLIENT_EMAIL` | Admin SDK | Server only |
 | `FIREBASE_ADMIN_PRIVATE_KEY` | Admin SDK | Server only |
-| `GEMINI_API_KEY` | Gemini Vision + AI | Server only |
+| `GEMINI_API_KEY` | Primary Gemini API Key | Server only |
+| `GEMINI_API_KEYS` | Gemini Backup Keys (comma-separated rotation pool) | Server only |
+| `GROQ_API_KEY` | Primary Groq API Key | Server only |
+| `GROQ_API_KEYS` | Groq Backup Keys (comma-separated rotation pool) | Server only |
 | `NEWS_API_KEY` | News ingestion (Phase 4) | Server only |
 | `REDDIT_CLIENT_ID` | Reddit API (Phase 4) | Server only |
 | `REDDIT_CLIENT_SECRET` | Reddit API (Phase 4) | Server only |
@@ -515,3 +518,5 @@ Latest price snapshot. One per symbol. Document ID = symbol (e.g. `RELIANCE`).
 ### Phase 10 (Daily Email Digest & Alerts)
 - Leveraged custom Gmail MCP service (`gmail_send_message` via standard MCP client) to handle transaction/alert emails rather than setting up separate SMTP or third-party paid providers.
 - Email triggers are integrated directly into the `process-news` cron pipeline, checking user preference filters (severity threshold and alert toggles) before firing a dispatch.
+- Added support for 3x daily digests (9:00 AM, 3:00 PM, 11:00 PM IST) and restricted immediate real-time emails to high-severity events only to optimize user experience.
+- Implemented robust API key rotation for both Groq (`callGroq`) and Gemini (`callGemini`) clients using multi-key environments (`GROQ_API_KEYS` and `GEMINI_API_KEYS`) to protect uploader OCR and background chronologies against 429 rate-limits and credential failures.

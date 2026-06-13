@@ -1,42 +1,39 @@
-# Portfolio Pulse
+# FinSage
 
-AI-powered portfolio intelligence platform. Monitors stocks, crypto, and market events. Alerts you when news actually matters to your holdings.
+AI-powered portfolio intelligence platform. FinSage monitors news, market events, and social signals across your stock and crypto holdings, then uses AI to surface only the events that actually matter to you.
 
 ## Tech Stack
 
 - **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS, Framer Motion
-- **Backend:** Firebase (Auth, Firestore, Storage, FCM)
-- **AI:** Google Gemini API
+- **Backend:** Firebase Auth, Firestore
+- **AI:** Google Gemini API (fallback to Groq Llama-3.3-70b)
 - **Hosting:** Vercel
 
 ## Local Setup
 
-1. Clone and install:
-   \`\`\`bash
+1. Clone and install dependencies:
+   ```bash
    npm install
-   \`\`\`
+   ```
 
 2. Copy environment variables:
-   \`\`\`bash
+   ```bash
    cp .env.example .env.local
-   \`\`\`
+   ```
 
-3. Fill in `.env.local`:
-   - Firebase: create project at https://console.firebase.google.com
-   - Gemini API key: https://aistudio.google.com/apikey
-   - News API key: https://newsapi.org (Phase 4)
+3. Configure your keys in `.env.local`:
+   - Firebase Client Credentials
+   - Gemini API key(s) (supports key rotation via `GEMINI_API_KEYS`)
+   - Groq API key(s) (supports key rotation via `GROQ_API_KEYS`)
+   - News API key: https://newsapi.org
 
-4. Run dev server:
-   \`\`\`bash
+4. Run development server:
+   ```bash
    npm run dev
-   \`\`\`
+   ```
 
-   Open http://localhost:3000
-
-## Architecture
-
-See `/docs/architecture.md` for the full system design including the two-stage filter and tiered ingestion strategy.
+   Open [http://localhost:3000](http://localhost:3000)
 
 ## Important
 
-This is NOT a trading platform. NOT financial advice. NOT a prediction system. It is a monitoring and signal-filtering tool only. Users make their own decisions.
+FinSage is NOT a trading platform, NOT financial advice, and NOT a stock prediction system. It is a monitoring and signal-filtering tool. All investment decisions are made solely by the user.
