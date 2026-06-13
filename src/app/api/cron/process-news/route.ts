@@ -308,9 +308,9 @@ async function createUserAlerts(
 
       alertsCreated++;
 
-      // Queue email alert details if user enabled it and meets severity threshold
+      // Queue email alert details if user enabled it and it is high severity
       const settings = userSettings.get(uid);
-      if (settings && settings.email && settings.emailAlerts) {
+      if (settings && settings.email && settings.emailAlerts && analysis.severity === "high") {
         const alertLevel = SEVERITY_LEVELS[analysis.severity] || 1;
         const userThreshold = SEVERITY_LEVELS[settings.severityThreshold] || 2;
 

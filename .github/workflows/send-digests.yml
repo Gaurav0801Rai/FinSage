@@ -1,0 +1,24 @@
+name: Send Daily Digests
+
+on:
+  schedule:
+    - cron: '30 3,9,17 * * *'
+  workflow_dispatch: # Allows triggering manually from GitHub Action tab
+
+jobs:
+  send-digests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Send Digests Endpoint
+        run: |
+          APP_URL="${{ secrets.APP_URL }}"
+          if [ -z "$APP_URL" ]; then
+            APP_URL="https://finsage-plum.vercel.app"
+          fi
+          CRON_SECRET="${{ secrets.CRON_SECRET }}"
+          if [ -z "$CRON_SECRET" ]; then
+            CRON_SECRET="pp-cron-2026-secret"
+          fi
+          curl -X GET "$APP_URL/api/cron/send-digests" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -f
