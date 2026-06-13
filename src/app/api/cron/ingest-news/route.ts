@@ -36,3 +36,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const maxDuration = 60; // 60 seconds max timeout on Vercel Hobby
+export const dynamic = "force-dynamic";

@@ -122,26 +122,37 @@ async function executeOverHttp(url: string, method: string, params: any): Promis
     params,
   };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // Include API Key or Secret if configured
-      ...(process.env.MCP_SERVER_SECRET ? { "Authorization": `Bearer ${process.env.MCP_SERVER_SECRET}` } : {}),
-    },
-    body: JSON.stringify(request),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 seconds timeout
 
-  if (!response.ok) {
-    throw new Error(`HTTP error calling MCP server: ${response.status} ${response.statusText}`);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Include API Key or Secret if configured
+        ...(process.env.MCP_SERVER_SECRET ? { "Authorization": `Bearer ${process.env.MCP_SERVER_SECRET}` } : {}),
+      },
+      body: JSON.stringify(request),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error calling MCP server: ${response.status} ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+    if (responseData.error) {
+      throw new Error(responseData.error.message || "Unknown HTTP JSON-RPC error");
+    }
+
+    return responseData.result;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-
-  const responseData = await response.json();
-  if (responseData.error) {
-    throw new Error(responseData.error.message || "Unknown HTTP JSON-RPC error");
-  }
-
-  return responseData.result;
 }
 
 /**

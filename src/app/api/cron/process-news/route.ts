@@ -65,9 +65,9 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
 
       if (res.status === 429) {
         console.log(
-          `Rate limited on attempt ${attempt + 1}, waiting 60s...`
+          `Rate limited on attempt ${attempt + 1}, waiting 5s...`
         );
-        await sleep(60000);
+        await sleep(5000);
         continue;
       }
 
@@ -418,7 +418,7 @@ export async function GET(request: Request) {
         );
 
         // Wait between AI calls to avoid rate limits
-        await sleep(3000);
+        await sleep(1500);
       } catch (err) {
         console.error(`Error processing ${newsId}:`, err);
         await doc.ref
@@ -439,7 +439,7 @@ export async function GET(request: Request) {
         userEmails[item.uid].push(item);
       });
 
-      for (const [uid, items] of Object.entries(userEmails)) {
+      const emailPromises = Object.entries(userEmails).map(async ([uid, items]) => {
         const email = items[0].email;
         
         const symbolGroups: Record<string, Array<{ title: string; whyItMatters: string; severity: string }>> = {};
@@ -479,24 +479,28 @@ export async function GET(request: Request) {
         const subjectSymbols = Object.keys(symbolGroups).join(", ");
         const emailSubject = `[FinSage Alert] Impact Detected: ${subjectSymbols}`;
 
-        callMcpTool("gmail_send_message", {
-          to: email,
-          subject: emailSubject,
-          body: emailBody,
-          userId: "me",
-          message: {
+        try {
+          await callMcpTool("gmail_send_message", {
             to: email,
             subject: emailSubject,
-            raw: Buffer.from(
-              `To: ${email}\r\n` +
-              `Subject: ${emailSubject}\r\n\r\n` +
-              emailBody
-            ).toString("base64url")
-          }
-        }).catch((err) => {
+            body: emailBody,
+            userId: "me",
+            message: {
+              to: email,
+              subject: emailSubject,
+              raw: Buffer.from(
+                `To: ${email}\r\n` +
+                `Subject: ${emailSubject}\r\n\r\n` +
+                emailBody
+              ).toString("base64url")
+            }
+          });
+        } catch (err) {
           console.error(`[MCP Gmail Alert] Failed to send consolidated email for user ${uid} (${email}):`, err);
-        });
-      }
+        }
+      });
+
+      await Promise.all(emailPromises);
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -520,3 +524,6 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export const maxDuration = 60; // 60 seconds max timeout on Vercel Hobby
+export const dynamic = "force-dynamic";
