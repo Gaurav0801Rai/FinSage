@@ -309,11 +309,14 @@ export const ALL_TICKERS: TickerEntry[] = [
 // This runs on every article BEFORE any AI call.
 // Must be fast — pure string matching, no async.
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function matchTickersInText(
   text: string,
   userSymbols?: string[] // if provided, only match tickers the user holds
 ): string[] {
-  const lower = text.toLowerCase();
   const matched = new Set<string>();
 
   const tickersToCheck = userSymbols
@@ -322,7 +325,11 @@ export function matchTickersInText(
 
   for (const ticker of tickersToCheck) {
     for (const term of ticker.terms) {
-      if (lower.includes(term)) {
+      const trimmedTerm = term.trim();
+      if (!trimmedTerm) continue;
+      const escaped = escapeRegExp(trimmedTerm);
+      const regex = new RegExp(`\\b${escaped}\\b`, "i");
+      if (regex.test(text)) {
         matched.add(ticker.symbol);
         break; // found a match for this ticker, no need to check other terms
       }
@@ -335,8 +342,13 @@ export function matchTickersInText(
 // ─── Macro matcher ────────────────────────────────────────────────────────────
 
 export function isMacroEvent(text: string): boolean {
-  const lower = text.toLowerCase();
-  return MACRO_TERMS.some((term) => lower.includes(term));
+  return MACRO_TERMS.some((term) => {
+    const trimmedTerm = term.trim();
+    if (!trimmedTerm) return false;
+    const escaped = escapeRegExp(trimmedTerm);
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
+    return regex.test(text);
+  });
 }
 
 // ─── Build a user-specific ticker set ────────────────────────────────────────
