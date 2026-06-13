@@ -73,8 +73,28 @@ function getAdminApp(): App {
   }
 }
 
-export const adminAuth: Auth = getAuth(getAdminApp());
-export const adminDb: Firestore = getFirestore(getAdminApp());
+let cachedDb: Firestore | undefined;
+let cachedAuth: Auth | undefined;
+
+export const adminDb = new Proxy<Firestore>({} as Firestore, {
+  get(target, prop, receiver) {
+    if (!cachedDb) {
+      cachedDb = getFirestore(getAdminApp());
+    }
+    const value = Reflect.get(cachedDb, prop, receiver);
+    return typeof value === "function" ? value.bind(cachedDb) : value;
+  }
+});
+
+export const adminAuth = new Proxy<Auth>({} as Auth, {
+  get(target, prop, receiver) {
+    if (!cachedAuth) {
+      cachedAuth = getAuth(getAdminApp());
+    }
+    const value = Reflect.get(cachedAuth, prop, receiver);
+    return typeof value === "function" ? value.bind(cachedAuth) : value;
+  }
+});
 
 /**
  * Verifies a Firebase session cookie and returns the decoded claims.
