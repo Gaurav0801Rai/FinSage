@@ -37,13 +37,29 @@ function cleanPrivateKey(key: string): string {
   return cleaned;
 }
 
+function cleanEnvString(val: string | undefined): string | undefined {
+  if (!val) return undefined;
+  let cleaned = val.trim();
+  if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if (cleaned.startsWith("'") && cleaned.endsWith("'")) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  cleaned = cleaned.replace(/\\n/g, "").replace(/\\r/g, "").replace(/[\r\n]+/g, "").trim();
+  return cleaned;
+}
+
 function getAdminApp(): App {
   if (getApps().length > 0) return getApps()[0];
 
   const rawKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
   const privateKey = rawKey ? cleanPrivateKey(rawKey) : undefined;
+  
+  const projectId = cleanEnvString(process.env.FIREBASE_ADMIN_PROJECT_ID);
+  const clientEmail = cleanEnvString(process.env.FIREBASE_ADMIN_CLIENT_EMAIL);
 
-  if (!privateKey || !process.env.FIREBASE_ADMIN_PROJECT_ID) {
+  if (!privateKey || !projectId) {
     throw new Error(
       "Firebase Admin env vars missing. Check FIREBASE_ADMIN_* in .env.local"
     );
@@ -52,8 +68,8 @@ function getAdminApp(): App {
   try {
     return initializeApp({
       credential: cert({
-        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        projectId,
+        clientEmail,
         privateKey,
       }),
     });
