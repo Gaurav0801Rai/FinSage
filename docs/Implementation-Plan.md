@@ -113,6 +113,15 @@ Wires up background email dispatching triggered directly during the news process
   - `[MODIFY]` [api/cron/process-news/route.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/api/cron/process-news/route.ts) (Wired user alerts filters matching thresholds and sending digest details)
   - `[NEW]` [lib/mcp-client.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/lib/mcp-client.ts) (Generic Client calling MCP server endpoints, specifically invoking `gmail_send_message` for alerts dispatching)
 
+### Phase 11 — Post-Release Operational Fixes ✅
+Resolve client-side environment variable sanitization, Windows carriage return parsing in LLM models, layout viewport locks, and daily return percentages.
+- **Files Created/Modified**:
+  - `[MODIFY]` [client.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/lib/firebase/client.ts) (Added cleanEnvValue to sanitise env vars from hidden carriage return/line break symbols)
+  - `[MODIFY]` [chatbot.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/actions/chatbot.ts) / [process-news/route.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/api/cron/process-news/route.ts) / [send-digests/route.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/api/cron/send-digests/route.ts) (Trimmed GROQ_MODEL variables to prevent model lookup 404 errors)
+  - `[MODIFY]` [mobile-nav.tsx](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/components/layout/mobile-nav.tsx) (Wired AI Chatbot links and icons to fully match desktop sidebar navigators)
+  - `[MODIFY]` [layout.tsx](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/%28dashboard%29/layout.tsx) / [sidebar.tsx](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/components/layout/sidebar.tsx) (Locked desktop view height to h-screen and enabled main viewport overflow scrolling to fix left sidebar position)
+  - `[MODIFY]` [price-service.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/lib/price-service.ts) (Modified Yahoo Finance range query to 1d to retrieve exact previous-close prices for daily return metrics)
+
 ---
 
 ## 4. Database Schema Structure

@@ -213,3 +213,22 @@ firebase deploy --only firestore:rules
 Ensure that the rule defines:
 1. `users/{uid}` - Read/write access strictly authorized to matching authenticated `uid`.
 2. `news`, `news_analyses`, `prices` - Global read permission, server write-only rules.
+
+---
+
+## 5. Troubleshooting & Operational Gotchas
+
+### 5.1 Carriage Returns and Newlines in `.env.local` (Windows)
+* **Problem**: Firebase Google Sign-In fails with `Illegal url for new iframe` containing `%0A`, or Groq calls fail with `404 Model Not Found` containing `\n`.
+* **Cause**: On Windows systems, `.env.local` uses CRLF (`\r\n`) line endings. Next.js sometimes bundles the variables with a trailing `\r` or `\n` character, resulting in illegal strings.
+* **Resolution**:
+  * For client-side Firebase configurations, [client.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/lib/firebase/client.ts) sanitizes all credentials with `cleanEnvValue()` to strip line endings.
+  * For server-side LLM models, calls to `process.env.GROQ_MODEL` must be formatted as `.trim()` (e.g. in [chatbot.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/actions/chatbot.ts)).
+
+### 5.2 Stickiness of Left Sidebar on Desktop
+* **Behavior**: When scrolling long pages, the left sidebar scrolls out of view.
+* **Resolution**: Constrain the parent element in [layout.tsx](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/app/%28dashboard%29/layout.tsx) using `md:h-screen md:overflow-hidden` and let the child page container handle its own independent scroll: `flex-1 overflow-y-auto min-h-0`. Set the sidebar component height class to `h-full` rather than `min-h-screen`.
+
+### 5.3 Calculating Daily returns
+* **Gotcha**: Querying Yahoo Finance chart API with `range=5d` shifts `chartPreviousClose` in the metadata response to 5 trading days ago, showing 5-day performance instead of daily performance.
+* **Resolution**: In [price-service.ts](file:///c:/Users/Gaurav%20Kumar/Desktop/Portfolio%20Pulse/src/lib/price-service.ts), use `range=1d` to ensure `chartPreviousClose` always represents the previous trading day's close.
