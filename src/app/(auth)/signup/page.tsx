@@ -39,9 +39,9 @@ export default function SignupPage() {
       });
       await createSession(idToken);
       router.push(ROUTES.dashboard);
-    } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getFirebaseErrorMessage(code));
+    } catch (err: any) {
+      const code = err.code ?? "";
+      setError(`${getFirebaseErrorMessage(code)} [${code || err.message}]`);
     } finally {
       setLoading(false);
     }
@@ -60,9 +60,9 @@ export default function SignupPage() {
       });
       await createSession(idToken);
       router.push(ROUTES.dashboard);
-    } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getFirebaseErrorMessage(code));
+    } catch (err: any) {
+      const code = err.code ?? "";
+      setError(`${getFirebaseErrorMessage(code)} [${code || err.message}]`);
     } finally {
       setGoogleLoading(false);
     }

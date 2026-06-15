@@ -39,9 +39,9 @@ function LoginForm() {
       });
       await createSession(idToken);
       router.push(from);
-    } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getFirebaseErrorMessage(code));
+    } catch (err: any) {
+      const code = err.code ?? "";
+      setError(`${getFirebaseErrorMessage(code)} [${code || err.message}]`);
     } finally {
       setLoading(false);
     }
@@ -60,9 +60,9 @@ function LoginForm() {
       });
       await createSession(idToken);
       router.push(from);
-    } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getFirebaseErrorMessage(code));
+    } catch (err: any) {
+      const code = err.code ?? "";
+      setError(`${getFirebaseErrorMessage(code)} [${code || err.message}]`);
     } finally {
       setGoogleLoading(false);
     }
