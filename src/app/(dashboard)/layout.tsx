@@ -28,21 +28,21 @@ export default async function DashboardLayout({
   if (!valid) redirect(ROUTES.login);
 
   return (
-    <div className="flex min-h-screen bg-canvas relative">
+    <div className="flex min-h-screen md:h-screen md:overflow-hidden bg-canvas relative">
       {/* Desktop sidebar — hidden on mobile */}
-      <div className="hidden md:flex">
+      <div className="hidden md:flex h-full shrink-0">
         <SidebarWrapper />
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 md:h-full">
         {/* Mobile top bar */}
-        <div className="md:hidden">
+        <div className="md:hidden shrink-0">
           <MobileNav />
         </div>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-y-auto min-h-0">
           <PageTransition>
             {children}
           </PageTransition>

@@ -55,7 +55,7 @@ export function Sidebar({ unreadAlertCount = 0 }: SidebarProps) {
 
   return (
     <aside
-      className="flex flex-col w-64 min-h-screen
+      className="flex flex-col w-64 h-full
                  bg-[#0E131A] border-r border-[#64748B]/10 shrink-0"
     >
       {/* Logo */}
