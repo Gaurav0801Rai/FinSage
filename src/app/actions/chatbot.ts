@@ -155,7 +155,7 @@ Maintain this context in your replies. Use the conversation history to provide c
 
     if (hasGroqKeys) {
       console.log("[Chatbot] Routing request to Groq API with rotation support...");
-      const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+      const GROQ_MODEL = (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim();
 
       // Map conversation history to OpenAI-compatible messages format
       const messages = [

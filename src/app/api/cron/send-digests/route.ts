@@ -45,7 +45,7 @@ async function generateCombinedSummary(
     try {
       console.log("Attempting fallback to Groq for combined summary...");
       const data = await callGroq({
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        model: (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim(),
         messages: [
           {
             role: "system",

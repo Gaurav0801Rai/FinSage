@@ -4,8 +4,8 @@ import { useState }      from "react";
 import Link              from "next/link";
 import { usePathname, useRouter }  from "next/navigation";
 import {
-  Menu, X, LayoutDashboard, Briefcase,
-  Bell, Eye, Newspaper, Settings, LogOut,
+  Menu, X, LayoutDashboard, Wallet,
+  Bell, Star, Newspaper, MessageSquare, Settings, LogOut,
 } from "lucide-react";
 import { Logo }          from "@/components/brand/logo";
 import { useAuth }       from "@/contexts/auth-context";
@@ -15,11 +15,12 @@ import { ROUTES }        from "@/lib/constants";
 import { cn }            from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { href: ROUTES.dashboard, label: "Dashboard", icon: LayoutDashboard },
-  { href: ROUTES.upload,    label: "Portfolio",  icon: Briefcase },
+  { href: ROUTES.dashboard, label: "Dashboard",  icon: LayoutDashboard },
+  { href: ROUTES.portfolio, label: "Portfolio",  icon: Wallet },
   { href: ROUTES.alerts,    label: "Alerts",     icon: Bell },
-  { href: ROUTES.watchlist, label: "Watchlist",  icon: Eye },
+  { href: ROUTES.watchlist, label: "Watchlist",  icon: Star },
   { href: ROUTES.news,      label: "News",       icon: Newspaper },
+  { href: ROUTES.chatbot,   label: "AI Chatbot", icon: MessageSquare },
   { href: ROUTES.settings,  label: "Settings",   icon: Settings },
 ];
 

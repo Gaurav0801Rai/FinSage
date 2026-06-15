@@ -76,7 +76,7 @@ Do not include any explanation outside the JSON. Return raw JSON only.`;
     console.log("Attempting fallback to Groq API for news analysis...");
     try {
       const data = await callGroq({
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        model: (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim(),
         messages: [
           {
             role: "system",
@@ -325,7 +325,7 @@ async function generateCombinedSummary(
     try {
       console.log("Attempting fallback to Groq for combined summary...");
       const data = await callGroq({
-        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+        model: (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim(),
         messages: [
           {
             role: "system",

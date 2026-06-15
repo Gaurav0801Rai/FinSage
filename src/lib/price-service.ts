@@ -81,7 +81,7 @@ async function fetchYahooPrice(
   if (exchange === "NSE") yahooSymbol = `${symbol}.NS`;
   else if (exchange === "BSE") yahooSymbol = `${symbol}.BO`;
 
-  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=5d`;
+  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?interval=1d&range=1d`;
 
   try {
     const res = await fetch(url, {
