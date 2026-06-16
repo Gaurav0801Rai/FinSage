@@ -1,9 +1,8 @@
 import { cookies }            from "next/headers";
 import { adminAuth, adminDb } from "@/lib/firebase/admin";
-import { AlertCard }          from "@/components/alerts/alert-card";
 import { AlertsEmpty }        from "@/components/alerts/alerts-empty";
 import { Bell }               from "lucide-react";
-import { MarkCategoryReadButton } from "@/components/alerts/mark-category-read-button";
+import { CollapsibleAlertsList } from "@/components/alerts/collapsible-alerts-list";
 
 async function getAlertsData() {
   try {
@@ -78,9 +77,14 @@ async function getAlertsData() {
       })
     );
 
-    const unreadCount = alerts.filter((a) => !a.readAt).length;
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const filteredAlerts = alerts.filter(
+      (a) => new Date(a.createdAt) >= fortyEightHoursAgo
+    );
 
-    return { alerts, unreadCount, uid };
+    const unreadCount = filteredAlerts.filter((a) => !a.readAt).length;
+
+    return { alerts: filteredAlerts, unreadCount, uid };
   } catch (err) {
     console.error("Alerts page error:", err);
     return { alerts: [], unreadCount: 0 };
@@ -188,41 +192,7 @@ export default async function AlertsPage() {
 
       {/* Grouped alerts list */}
       {alerts.length > 0 && (
-        <div className="space-y-10">
-          {sortedGroups.map((group) => (
-            <div key={group.symbol || "general"} className="space-y-4">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="text-lg font-semibold text-white/90">
-                    {group.name}
-                  </h2>
-                  {group.symbol && (
-                    <span className="text-[10px] font-mono font-bold bg-white/[0.04] border border-white/[0.08] px-2 py-0.5 rounded text-white/50">
-                      {group.symbol}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2.5">
-                  {group.unreadCount > 0 && (
-                    <MarkCategoryReadButton symbol={group.symbol} />
-                  )}
-                  <span className="text-xs font-semibold text-accent-400 bg-accent-500/[0.04] border border-accent-500/10 px-2.5 py-1 rounded-full">
-                    {group.unreadCount > 0
-                      ? `${group.unreadCount} new`
-                      : `${group.alerts.length} total`
-                    }
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {group.alerts.map((alert) => (
-                  <AlertCard key={alert.id} alert={alert} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <CollapsibleAlertsList sortedGroups={sortedGroups} />
       )}
     </div>
   );

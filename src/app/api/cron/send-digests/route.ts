@@ -99,6 +99,28 @@ export async function GET(request: Request) {
       const email = data.email || "";
       const hasDigest = data.preferences?.dailyDigest !== false; // defaults to true
 
+      // Clean up alerts older than 48 hours for this user
+      try {
+        const fortyEightHoursAgo = Timestamp.fromMillis(Date.now() - 48 * 60 * 60 * 1000);
+        const oldAlertsSnap = await adminDb
+          .collection("users")
+          .doc(userDoc.id)
+          .collection("alerts")
+          .where("createdAt", "<=", fortyEightHoursAgo)
+          .get();
+
+        if (!oldAlertsSnap.empty) {
+          const deleteBatch = adminDb.batch();
+          oldAlertsSnap.docs.forEach((doc) => {
+            deleteBatch.delete(doc.ref);
+          });
+          await deleteBatch.commit();
+          console.log(`Deleted ${oldAlertsSnap.size} old alerts for user ${userDoc.id}`);
+        }
+      } catch (cleanupErr) {
+        console.error(`Failed to clean up old alerts for user ${userDoc.id}:`, cleanupErr);
+      }
+
       if (!email || !hasDigest) return;
 
       processedUsers++;

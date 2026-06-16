@@ -120,8 +120,6 @@ export async function dismissAlert(alertId: string): Promise<void> {
   }
 }
 
-// Get unread alert count for the current user
-// Used by the sidebar badge
 export async function getUnreadAlertCount(): Promise<number> {
   try {
     const user = await getAuthenticatedUser();
@@ -133,10 +131,16 @@ export async function getUnreadAlertCount(): Promise<number> {
       .collection("alerts")
       .where("readAt", "==", null)
       .where("dismissed", "==", false)
-      .count()
       .get();
 
-    return snap.data().count;
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const count = snap.docs.filter((doc) => {
+      const data = doc.data();
+      const createdAt = data.createdAt?.toDate?.() ?? new Date();
+      return createdAt >= fortyEightHoursAgo;
+    }).length;
+
+    return count;
   } catch {
     return 0;
   }
