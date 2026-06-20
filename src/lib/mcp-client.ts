@@ -170,12 +170,53 @@ export async function callMcpTool(toolName: string, args: Record<string, any>): 
   try {
     let result: any;
     if (sseUrl) {
-      // Production or cloud-bridge route
-      console.log(`[MCP Client] Executing tool '${toolName}' over HTTP: ${sseUrl}`);
-      result = await executeOverHttp(`${sseUrl}/tools/call`, "tools/call", {
-        name: toolName,
-        arguments: args,
+      // Production or cloud-bridge route (custom FastAPI server mapping)
+      console.log(`[MCP Client] Mapping tool '${toolName}' to FastAPI HTTP: ${sseUrl}`);
+      
+      const endpoint = toolName === "gmail_send_message"
+        ? "/send_email"
+        : toolName.includes("draft") || toolName.includes("message") 
+          ? "/create_email_draft" 
+          : "/append_to_doc";
+
+      const payload = endpoint === "/create_email_draft" || endpoint === "/send_email"
+        ? {
+            to: args.to || "",
+            subject: args.subject || "",
+            body: args.body || args.text_body || "",
+          }
+        : {
+            doc_id: args.doc_id || args.document_id || "",
+            content: args.content || "",
+          };
+
+      const response = await fetch(`${sseUrl}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(process.env.MCP_SERVER_SECRET ? { "Authorization": `Bearer ${process.env.MCP_SERVER_SECRET}` } : {}),
+        },
+        body: JSON.stringify(payload),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error calling FastAPI MCP server: ${response.status} ${response.statusText}`);
+      }
+
+      const responseData = await response.json();
+      const entityId = responseData?.data?.id || "";
+      const isSend = endpoint === "/send_email";
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: isSend
+              ? `[SUCCESS] Email successfully sent. Message ID: ${entityId}`
+              : `[SUCCESS] Draft successfully created. Draft ID: ${entityId}`,
+          },
+        ],
+      };
     } else if (process.env.MCP_SERVER_PATH) {
       // Local dev stdio route
       console.log(`[MCP Client] Executing tool '${toolName}' over stdio`);
