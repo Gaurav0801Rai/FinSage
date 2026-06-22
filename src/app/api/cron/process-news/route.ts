@@ -308,7 +308,7 @@ async function generateCombinedSummary(
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 250,
+          maxOutputTokens: 1024,
         },
       },
       "v1"
@@ -487,26 +487,34 @@ export async function GET(request: Request) {
           }
         });
 
-        let emailBody = `Hello,\n\nFinSage has detected market events that affect your portfolio holdings:\n\n`;
+        // Construct email body (Option A formatting)
+        let emailBody = `🚀 FinSage Portfolio Intelligence Alert\n`;
+        emailBody += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        emailBody += `Market events affecting your portfolio holdings have been detected:\n\n`;
 
         for (const [symbol, alerts] of Object.entries(symbolGroups)) {
-          emailBody += `========================================\n`;
-          emailBody += `${symbol.toUpperCase()}\n`;
-          emailBody += `========================================\n`;
+          emailBody += `💎 ${symbol.toUpperCase()}\n`;
+          emailBody += `────────────────────────────────────────\n`;
 
           alerts.forEach((alert) => {
-            emailBody += `• Alert: "${alert.title}"\n`;
-            emailBody += `  Impact: ${alert.severity.toUpperCase()}\n`;
+            emailBody += `• "${alert.title}"\n`;
+            emailBody += `  [Severity: ${alert.severity.toUpperCase()}]\n`;
             emailBody += `  Analysis: ${alert.whyItMatters}\n\n`;
           });
 
           if (alerts.length > 1) {
             const combined = await generateCombinedSummary(symbol, alerts);
-            emailBody += `Summary of ${symbol} events:\n${combined}\n\n`;
+            emailBody += `┌───────────────────────────────────────\n`;
+            emailBody += `│ 💡 Consolidated Summary (${symbol.toUpperCase()}):\n`;
+            emailBody += `│ ${combined.split('\n').join('\n│ ')}\n`;
+            emailBody += `└───────────────────────────────────────\n\n`;
           }
+          emailBody += `\n`;
         }
 
-        emailBody += `You can view all your active alerts and details directly in your FinSage dashboard.\n\n`;
+        emailBody += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        emailBody += `You can view all your active alerts and details directly in your FinSage dashboard:\n`;
+        emailBody += `🔗 ${process.env.NEXT_PUBLIC_APP_URL || "https://finsage.vercel.app"}/alerts\n\n`;
         emailBody += `Regards,\nFinSage AI Alerts`;
 
         const subjectSymbols = Object.keys(symbolGroups).join(", ");

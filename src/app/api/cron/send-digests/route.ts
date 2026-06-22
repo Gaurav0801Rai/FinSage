@@ -6,6 +6,7 @@ import { callGroq } from "@/lib/groq";
 import { callGemini } from "@/lib/gemini";
 
 const GEMINI_MODEL = "gemini-2.5-flash";
+const SEVERITY_LEVELS: Record<string, number> = { low: 1, medium: 2, high: 3 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -28,7 +29,7 @@ async function generateCombinedSummary(
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 250,
+          maxOutputTokens: 1024,
         },
       },
       "v1"
@@ -183,6 +184,13 @@ export async function GET(request: Request) {
         const whyItMatters = aData.whyItMatters || aData.impactSummary || "";
         const severity = aData.severity || "low";
 
+        // Filter alerts by user's alertSeverityThreshold setting
+        const alertLevel = SEVERITY_LEVELS[severity] || 1;
+        const userThreshold = SEVERITY_LEVELS[data.preferences?.alertSeverityThreshold || "medium"] || 2;
+        if (alertLevel < userThreshold) {
+          continue;
+        }
+
         symbols.forEach((symbol) => {
           if (!symbolGroups[symbol]) symbolGroups[symbol] = [];
           if (!symbolGroups[symbol].some((x) => x.title === title)) {
@@ -196,27 +204,33 @@ export async function GET(request: Request) {
         return;
       }
 
-      // Construct digest body
-      let emailBody = `Hello,\n\nHere is your FinSage Portfolio Intelligence Digest:\n\n`;
+      // Construct digest body (Option A formatting)
+      let emailBody = `🚀 FinSage Portfolio Intelligence Digest\n`;
+      emailBody += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
       for (const [symbol, alerts] of Object.entries(symbolGroups)) {
-        emailBody += `========================================\n`;
-        emailBody += `${symbol.toUpperCase()}\n`;
-        emailBody += `========================================\n`;
+        emailBody += `💎 ${symbol.toUpperCase()}\n`;
+        emailBody += `────────────────────────────────────────\n`;
 
         alerts.forEach((alert) => {
-          emailBody += `• Alert: "${alert.title}"\n`;
-          emailBody += `  Impact: ${alert.severity.toUpperCase()}\n`;
+          emailBody += `• "${alert.title}"\n`;
+          emailBody += `  [Severity: ${alert.severity.toUpperCase()}]\n`;
           emailBody += `  Analysis: ${alert.whyItMatters}\n\n`;
         });
 
         if (alerts.length > 1) {
           const combined = await generateCombinedSummary(symbol, alerts);
-          emailBody += `Summary of ${symbol} events:\n${combined}\n\n`;
+          emailBody += `┌───────────────────────────────────────\n`;
+          emailBody += `│ 💡 Consolidated Summary (${symbol.toUpperCase()}):\n`;
+          emailBody += `│ ${combined.split('\n').join('\n│ ')}\n`;
+          emailBody += `└───────────────────────────────────────\n\n`;
         }
+        emailBody += `\n`;
       }
 
-      emailBody += `You can view all active alerts and details directly in your FinSage dashboard.\n\n`;
+      emailBody += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      emailBody += `You can view all active alerts and details directly in your FinSage dashboard:\n`;
+      emailBody += `🔗 ${process.env.NEXT_PUBLIC_APP_URL || "https://finsage.vercel.app"}/alerts\n\n`;
       emailBody += `Regards,\nFinSage AI Alerts`;
 
       const subjectSymbols = Object.keys(symbolGroups).join(", ");
@@ -239,12 +253,11 @@ export async function GET(request: Request) {
           },
         });
         digestsSent++;
+        // Update user's lastDigestAt only if email successfully sent
+        await userDoc.ref.update({ lastDigestAt: Timestamp.now() });
       } catch (err) {
         console.error(`[Digest Route] Failed to send email to ${email}:`, err);
       }
-
-      // Update user's lastDigestAt
-      await userDoc.ref.update({ lastDigestAt: Timestamp.now() });
     });
 
     await Promise.all(digestPromises);
