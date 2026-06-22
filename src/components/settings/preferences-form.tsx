@@ -139,10 +139,10 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
         {/* Severity threshold */}
         <div className="mb-5">
           <label className="block text-xs text-white/50 mb-2">
-            Minimum Alert Severity
+            Minimum Instant Alert Severity
           </label>
           <p className="text-xs text-white/30 mb-3">
-            Only receive alerts at this level or higher.
+            Only receive real-time email alerts at this level or higher.
           </p>
           <div className="flex gap-2">
             {(["low", "medium", "high"] as const).map((s) => {
@@ -192,21 +192,58 @@ export function PreferencesForm({ initial }: PreferencesFormProps) {
           />
         </div>
 
-        {/* Digest time — only shown if daily digest is on */}
+        {/* Digest time & severity — only shown if daily digest is on */}
         {prefs.dailyDigest && (
-          <div className="mt-4 pt-4 border-t border-glass-border">
-            <label className="block text-xs text-white/50 mb-1.5">
-              Digest Delivery Time
-            </label>
-            <input
-              type="time"
-              value={prefs.digestTime}
-              onChange={(e) => update("digestTime", e.target.value)}
-              className="px-3 py-2 rounded-xl text-sm
-                         bg-white/[0.04] border border-white/10
-                         text-white/80 focus:outline-none
-                         focus:border-accent-400/60 transition-colors"
-            />
+          <div className="mt-4 pt-4 border-t border-glass-border space-y-4">
+            {/* Delivery Time */}
+            <div>
+              <label className="block text-xs text-white/50 mb-1.5">
+                Digest Delivery Time
+              </label>
+              <input
+                type="time"
+                value={prefs.digestTime}
+                onChange={(e) => update("digestTime", e.target.value)}
+                className="px-3 py-2 rounded-xl text-sm
+                           bg-white/[0.04] border border-white/10
+                           text-white/80 focus:outline-none
+                           focus:border-accent-400/60 transition-colors"
+              />
+            </div>
+
+            {/* Severity threshold for Daily Digest */}
+            <div>
+              <label className="block text-xs text-white/50 mb-2">
+                Minimum Digest Severity
+              </label>
+              <p className="text-xs text-white/30 mb-3">
+                Only include alerts at this level or higher in your daily digest.
+              </p>
+              <div className="flex gap-2">
+                {(["low", "medium", "high"] as const).map((s) => {
+                  const colors = {
+                    low:    "text-blue-400  bg-blue-500/10  border-blue-500/30",
+                    medium: "text-accent-400 bg-accent-500/10 border-accent-500/30",
+                    high:   "text-loss      bg-loss/10      border-loss/30",
+                  };
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => update("digestSeverityThreshold", s)}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-sm font-medium",
+                        "border transition-all capitalize",
+                        prefs.digestSeverityThreshold === s
+                          ? colors[s]
+                          : "border-white/10 text-white/50 hover:border-white/20"
+                      )}
+                    >
+                      {s}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         )}
       </div>

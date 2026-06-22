@@ -184,9 +184,9 @@ export async function GET(request: Request) {
         const whyItMatters = aData.whyItMatters || aData.impactSummary || "";
         const severity = aData.severity || "low";
 
-        // Filter alerts by user's alertSeverityThreshold setting
+        // Filter alerts by user's digestSeverityThreshold setting
         const alertLevel = SEVERITY_LEVELS[severity] || 1;
-        const userThreshold = SEVERITY_LEVELS[data.preferences?.alertSeverityThreshold || "medium"] || 2;
+        const userThreshold = SEVERITY_LEVELS[data.preferences?.digestSeverityThreshold || "low"] || 1;
         if (alertLevel < userThreshold) {
           continue;
         }

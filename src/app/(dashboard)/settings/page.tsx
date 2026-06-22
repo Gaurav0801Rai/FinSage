@@ -34,6 +34,7 @@ export default async function SettingsPage() {
           initial={{
             baseCurrency:           prefs.baseCurrency,
             alertSeverityThreshold: prefs.alertSeverityThreshold,
+            digestSeverityThreshold: prefs.digestSeverityThreshold,
             emailAlerts:            prefs.emailAlerts,
             pushAlerts:             prefs.pushAlerts,
             dailyDigest:            prefs.dailyDigest,

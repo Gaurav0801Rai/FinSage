@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 export interface PreferencesInput {
   baseCurrency:              "INR" | "USD";
   alertSeverityThreshold:   "high" | "medium" | "low";
+  digestSeverityThreshold:  "high" | "medium" | "low";
   emailAlerts:               boolean;
   pushAlerts:                boolean;
   dailyDigest:               boolean;
@@ -27,6 +28,7 @@ export async function updatePreferences(
       .update({
         "preferences.baseCurrency":            prefs.baseCurrency,
         "preferences.alertSeverityThreshold":  prefs.alertSeverityThreshold,
+        "preferences.digestSeverityThreshold": prefs.digestSeverityThreshold,
         "preferences.emailAlerts":             prefs.emailAlerts,
         "preferences.pushAlerts":              prefs.pushAlerts,
         "preferences.dailyDigest":             prefs.dailyDigest,
@@ -133,6 +135,7 @@ export async function getUserPreferences() {
       email:                   (data.email       as string) ?? "",
       baseCurrency:            (data.preferences?.baseCurrency            ?? "INR") as "INR" | "USD",
       alertSeverityThreshold:  (data.preferences?.alertSeverityThreshold  ?? "medium") as "high" | "medium" | "low",
+      digestSeverityThreshold: (data.preferences?.digestSeverityThreshold ?? "low") as "high" | "medium" | "low",
       emailAlerts:             (data.preferences?.emailAlerts             ?? true)  as boolean,
       pushAlerts:              (data.preferences?.pushAlerts              ?? false) as boolean,
       dailyDigest:             (data.preferences?.dailyDigest             ?? true)  as boolean,
