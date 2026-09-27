@@ -47,8 +47,8 @@ export async function callGroq(payload: {
         console.error(`[Groq Client] Key ${i + 1}/${keys.length} returned error ${res.status}:`, errText);
         lastError = new Error(`Groq HTTP error ${res.status}: ${errText}`);
         
-        // If it's a validation error (400), don't retry other keys as payload is invalid
-        if (res.status === 400) {
+        // If it's a validation error (400) or model not found (404), don't retry other keys as payload/model is invalid
+        if (res.status === 400 || res.status === 404) {
           throw lastError;
         }
         continue;
@@ -60,7 +60,7 @@ export async function callGroq(payload: {
       console.error(`[Groq Client] Exception on key ${i + 1}/${keys.length}:`, err.message);
       lastError = err;
       
-      if (err.message?.includes("HTTP error 400")) {
+      if (err.message?.includes("HTTP error 400") || err.message?.includes("HTTP error 404")) {
         throw err;
       }
     }

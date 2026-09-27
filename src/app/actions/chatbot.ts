@@ -150,12 +150,13 @@ ${newsContext}
 
 Maintain this context in your replies. Use the conversation history to provide coherent answers.`;
 
-    // 6. Call AI API
+    // 6. Call AI API (Groq primary with automatic Gemini fallback)
     const hasGroqKeys = !!(process.env.GROQ_API_KEY || process.env.GROQ_API_KEYS);
+    let reply: string | undefined;
 
     if (hasGroqKeys) {
       console.log("[Chatbot] Routing request to Groq API with rotation support...");
-      const GROQ_MODEL = (process.env.GROQ_MODEL || "llama-3.3-70b-versatile").trim();
+      const GROQ_MODEL = (process.env.GROQ_MODEL || "openai/gpt-oss-120b").trim();
 
       // Map conversation history to OpenAI-compatible messages format
       const messages = [
@@ -174,19 +175,17 @@ Maintain this context in your replies. Use the conversation history to provide c
           temperature: 0.2,
         });
 
-        const reply = data?.choices?.[0]?.message?.content;
-
+        reply = data?.choices?.[0]?.message?.content;
         if (!reply) {
-          return { success: false, error: "Received empty reply from Groq." };
+          console.warn("[Chatbot] Received empty reply from Groq, attempting Gemini fallback...");
         }
-
-        return { success: true, response: reply };
       } catch (err: any) {
-        console.error("[Chatbot] Groq rotation API failed:", err);
-        return { success: false, error: "Failed to generate AI response via Groq: " + err.message };
+        console.error("[Chatbot] Groq rotation API failed, falling back to Gemini:", err.message || err);
       }
-    } else {
-      console.log("[Chatbot] GROQ_API_KEY not found. Falling back to Gemini API...");
+    }
+
+    if (!reply) {
+      console.log("[Chatbot] Attempting Gemini API fallback...");
       
       const hasGeminiKeys = !!(process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEYS);
       if (!hasGeminiKeys) {
@@ -216,18 +215,18 @@ Maintain this context in your replies. Use the conversation history to provide c
           "v1"
         );
 
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
         if (!reply) {
           return { success: false, error: "Received empty reply from Gemini." };
         }
-
-        return { success: true, response: reply };
       } catch (geminiErr: any) {
         console.error("[Chatbot] Gemini rotation API fallback failed:", geminiErr);
-        return { success: false, error: "Failed to generate AI response via Gemini: " + geminiErr.message };
+        return { success: false, error: "Failed to generate AI response: " + geminiErr.message };
       }
     }
+
+    return { success: true, response: reply };
   } catch (err) {
     console.error("askChatbot error:", err);
     return { success: false, error: "An unexpected error occurred: " + String(err) };

@@ -165,7 +165,7 @@ export async function callMcpTool(toolName: string, args: Record<string, any>): 
     throw new Error(`Permission Denied: Tool '${toolName}' is not allowed. Only Gmail tools can be executed.`);
   }
 
-  const sseUrl = (process.env.MCP_SERVER_URL || "https://google-mcp-server-production-72f8.up.railway.app").replace(/\/$/, "");
+  const sseUrl = (process.env.MCP_SERVER_URL || "https://google-mcp-server-five.vercel.app").replace(/\/$/, "");
 
   try {
     let result: any;

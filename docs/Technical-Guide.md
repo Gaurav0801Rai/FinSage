@@ -21,7 +21,7 @@ Ensure the following variables are defined in your `.env.local` file for develop
 | `FIREBASE_ADMIN_PRIVATE_KEY` | Server Only | Firestore Admin SDK private key |
 | `GEMINI_API_KEY` | Server Only | Google Gemini AI & Vision endpoints access (used as fallback for chatbot) |
 | `GROQ_API_KEY` | Server Only | Primary API key for chatbot completions (Groq API) |
-| `GROQ_MODEL` | Server Only | Optional. Model ID for chatbot on Groq (defaults to `llama-3.3-70b-versatile`) |
+| `GROQ_MODEL` | Server Only | Optional. Model ID for chatbot on Groq (defaults to `openai/gpt-oss-120b`) |
 | `NEWS_API_KEY` | Server Only | Target keyword queries for news ingestion pipeline |
 | `REDDIT_CLIENT_ID` | Server Only | Reddit API ingestion access (Phase 4) |
 | `REDDIT_CLIENT_SECRET` | Server Only | Reddit API ingestion secret key |
